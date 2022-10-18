@@ -17,7 +17,7 @@ class Main:
 
     def main(self):
         '''Run the program'''
-        self._logger.log_event('Starting program', self._class_name)
+        self._logger.log_event('Starting program')
 
 
 if __name__ == '__main__':

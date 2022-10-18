@@ -14,19 +14,16 @@ class Logger():
         experiment_dir = _create_experiments_folder(run_id)
         self._event_logger = _create_event_logger(experiment_dir)
 
-    def log_event(self, msg: str, source_class: str = ''):
+    def log_event(self, msg: str):
         '''Log an event.'''
-        msg = _add_class_to_message(msg, source_class)
         self._event_logger.info(msg)
 
-    def log_warning(self, msg: str, source_class: str = ''):
+    def log_warning(self, msg: str):
         '''Log a warning.'''
-        msg = _add_class_to_message(msg, source_class)
         self._event_logger.warning(msg)
 
-    def log_error(self, msg: str, source_class: str = ''):
+    def log_error(self, msg: str):
         '''Log an error.'''
-        msg = _add_class_to_message(msg, source_class)
         self._event_logger.error(msg)
 
 
@@ -35,12 +32,6 @@ def _create_experiments_folder(run_id: str) -> str:
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     return dir_path
-
-
-def _add_class_to_message(msg: str, source_class: str):
-    if source_class != '':
-        return f'({source_class}) {msg}'
-    return msg
 
 
 def _create_event_logger(experiment_dir: str) -> logging.Logger:
