@@ -5,7 +5,10 @@ import logging
 import os
 from datetime import datetime
 
+from lfd.models.classifier_nb import NaiveBayesClassifier
 from lfd.models.data import Data
+
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def _set_up_logger() -> None:
@@ -19,7 +22,7 @@ def _set_up_logger() -> None:
     file_handler = logging.FileHandler(f'{dir_path}/event.log')
     file_handler.setLevel(logging.INFO)
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.WARNING)
+    stream_handler.setLevel(logging.INFO)
 
     # Set the logging format.
     log_format = '%(asctime)s [%(levelname)s] - %(module)s: %(message)s'
@@ -60,9 +63,7 @@ def _parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--test-data',
         type=str,
-        default='data/test.tsv',
-        help='The path of the file containing testing data '
-        '(default: data/test.tsv)'
+        help='The path of the file containing testing data'
     )
 
     # Run modes
@@ -78,6 +79,12 @@ if __name__ == '__main__':
     args = _parse_arguments()
 
     data = Data(args.train_data, args.dev_data, args.test_data)
+    data.vectorizer = TfidfVectorizer
 
     if args.print_dataset_statistics:
         data.print_statistics()
+    else:
+        classifier = NaiveBayesClassifier()
+        classifier.train(data)
+        classifier.evaluate_dev(data)
+        classifier.evaluate_test(data)
