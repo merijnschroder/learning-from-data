@@ -1,15 +1,13 @@
 '''This module contains the Data class.'''
 
+import logging
 import os
 
-from helpers.data_helper import print_label_statistics
-from logger import Logger
+from lfd.helpers.data_helper import print_label_statistics
 
 
 class Data:
     '''This class holds all data.'''
-    _logger: Logger
-
     x_train: list
     y_train: list
     x_dev: list
@@ -17,10 +15,9 @@ class Data:
     x_test: list
     y_test: list
 
-    def __init__(self, train_file: str, dev_file: str, test_file: str, logger: Logger):
-        self._logger = logger
-
+    def __init__(self, train_file: str, dev_file: str, test_file: str):
         # Load the data from the data files.
+        logging.info('Start loading data')
         self.x_train, self.y_train = self._read_data_from_file(train_file)
         self.x_dev, self.y_dev = self._read_data_from_file(dev_file)
         if test_file is not None:
@@ -28,7 +25,7 @@ class Data:
 
     def print_statistics(self):
         '''Print information about the dataset stored in this class.'''
-        self._logger.log_event('Printing dataset statistics')
+        logging.info('Printing dataset statistics')
 
         # Print the statistics for all the individual datasets and all datasets
         # combined.
@@ -46,20 +43,22 @@ class Data:
         print('\nTest')
         print_label_statistics(self.y_test)
 
-    def _read_data_from_file(self, file_name: str) -> tuple[list, list]:
+    def _read_data_from_file(self, data_file_path: str) -> tuple[list, list]:
         '''Read the data from the data file.'''
-        self._logger.log_event(f'Loading data from {file_name}')
+        logging.info('Loading data from %s', data_file_path)
         features = []
         labels = []
 
         # Return empty lists if the file does not exist.
-        if not os.path.exists(file_name):
-            self._logger.log_warning(f'Data file {file_name} does not exist, '
-                                     'returning empty strings')
+        if not os.path.exists(data_file_path):
+            logging.warning(
+                'Data file %s does not exist, returning empty strings',
+                data_file_path
+            )
             return features, labels
 
         # Open the file, parse the data, and return the features and labels.
-        with open(file_name, encoding='utf-8') as file:
+        with open(data_file_path, encoding='utf-8') as file:
             for line in file:
                 tokens = line.strip()
                 tweet, label = tokens.split('\t')
