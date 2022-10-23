@@ -7,13 +7,11 @@ import pandas as pd
 RANDOM_STATE = 1234
 
 
-def file_writer(data, data_name, operation_name):
+def file_writer(folder_struct, data, data_name, operation_name):
     '''
     Checks whether a folder exists for the operation name, then
     saves the data to a file in that folder based on the data name.
     '''
-    folder_struct = '../../data/'
-
     if not os.path.exists(folder_struct + operation_name):
         os.mkdir(folder_struct + operation_name)
 
@@ -58,27 +56,35 @@ def sampling(data, replace=True, sampling: str = 'down'):
 
 
 def main():
+    duplicates = True
     folder_struct = '../../data/'
     names = 'Sentence (x) | Label (y)'.split(' | ')
+    datasets = {}
 
-    train = pd.read_csv(f'{folder_struct}train.tsv',
-                        sep='\t',
-                        names=names)
-    dev = pd.read_csv(f'{folder_struct}dev.tsv',
-                      sep='\t',
-                      names=names)
-    test = pd.read_csv(f'{folder_struct}test.tsv',
-                       sep='\t',
-                       names=names)
+    datasets['train'] = pd.read_csv(f'{folder_struct}train.tsv',
+                                    sep='\t',
+                                    names=names)
+    datasets['dev'] = pd.read_csv(f'{folder_struct}dev.tsv',
+                                  sep='\t',
+                                  names=names)
+    datasets['test'] = pd.read_csv(f'{folder_struct}test.tsv',
+                                   sep='\t',
+                                   names=names)
 
-    datasets = {'train': train, 'dev': dev, 'test': test}
+    if duplicates:
+        for name in datasets.keys():
+            datasets[name].drop_duplicates(inplace=True,
+                                           subset=['Sentence (x)'])
 
     for name, data in datasets.items():
+        if duplicates:
+            file_writer(folder_struct, data, name, 'deduplicated')
+
         data_downsampled = sampling(data, replace=False, sampling='down')
-        file_writer(data_downsampled, name, 'downsampled')
+        file_writer(folder_struct, data_downsampled, name, 'downsampled')
 
         data_upsampled = sampling(data, replace=True, sampling='up')
-        file_writer(data_upsampled, name, 'upsampled')
+        file_writer(folder_struct, data_upsampled, name, 'upsampled')
 
 
 if __name__ == '__main__':
