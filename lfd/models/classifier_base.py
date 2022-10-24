@@ -66,7 +66,10 @@ class BaseClassifier(abc.ABC):
         logging.info('Starting grid-search for %s', self.classifier_name)
 
         # Perform the grid-search.
-        grid_search = GridSearchCV(self._classifier, param_grid)
+        grid_search = GridSearchCV(
+            self._classifier, param_grid, scoring='f1_weighted', n_jobs=1,
+            refit=False
+        )
         grid_search.fit(data.x_train, data.y_train)
 
         # Write the results to a file.
