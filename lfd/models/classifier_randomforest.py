@@ -15,11 +15,11 @@ class RandomForestClassifier(BaseClassifier):
 
     def __init__(
         self,
-        n_estimators: int = 100,
-        criterion: Literal['gini', 'entropy', 'log_loss'] = "gini",
-        max_depth: Optional[int] = None,
-        min_samples_leaf: int = 1,
-        max_leaf_nodes: Optional[int] = None
+        n_estimators: int = 5,
+        criterion: Literal['gini', 'entropy', 'log_loss'] = 'entropy',
+        max_depth: Optional[int] = 100,
+        min_samples_leaf: int = 5,
+        max_leaf_nodes: Optional[int] = 100
     ):
         self._classifier = SKClassifier(
             n_estimators=n_estimators,

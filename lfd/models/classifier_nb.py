@@ -11,7 +11,7 @@ class NaiveBayesClassifier(BaseClassifier):
     _classifier_name: str = 'NaiveBayes'
     _classifier: BaseEstimator
 
-    def __init__(self, alpha: float = 1.0, fit_prior: bool = True):
+    def __init__(self, alpha: float = 0.8, fit_prior: bool = True):
         self._classifier = MultinomialNB(alpha=alpha, fit_prior=fit_prior)
         super().__init__()
 

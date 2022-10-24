@@ -14,10 +14,10 @@ class KNearestNeighboursClassifier(BaseClassifier):
 
     def __init__(
         self,
-        n_neighbours: int = 5,
+        n_neighbours: int = 1,
         weights: Literal['uniform', 'distance'] = 'uniform',
         distance_metric: Literal['euclidean', 'manhattan', 'cosine',
-                                 'haversine', 'minkowski'] = 'minkowski'
+                                 'haversine', 'minkowski'] = 'euclidean'
     ):
         self._classifier = KNeighborsClassifier(
             n_neighbors=n_neighbours,

@@ -15,7 +15,7 @@ class SupportVectorClassifier(BaseClassifier):
 
     def __init__(
         self,
-        C: float = 1,
+        C: float = 10,
         kernel: Literal['linear', 'poly', 'rbf', 'sigmoid',
                         'precomputed'] = 'rbf'
     ):
