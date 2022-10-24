@@ -5,8 +5,6 @@ import logging
 import os
 import sys
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-
 from lfd import RUN_ID
 from lfd.models.classifier_base import BaseClassifier
 from lfd.models.data import Data
@@ -142,7 +140,6 @@ def _main():
 
     # Load the data.
     data = Data(args.train_data, args.dev_data, args.test_data)
-    data.vectorizer = TfidfVectorizer
 
     if args.train or args.grid_search:
         classifiers: list[BaseClassifier]
@@ -150,8 +147,7 @@ def _main():
             logging.info('Running all models')
             classifiers = [
                 KNearestNeighboursClassifier(), NaiveBayesClassifier(), 
-                NaiveBayesClassifier(), RandomForestClassifier(),
-                SupportVectorClassifier()
+                RandomForestClassifier(), SupportVectorClassifier()
             ]
         else:
             classifiers = [_get_classifier(args)]

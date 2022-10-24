@@ -33,10 +33,10 @@ class RandomForestClassifier(BaseClassifier):
 
     def grid_search(self, data: Data):
         param_grid = {
-            'n_estimators': [5, 10, 50, 100, 500, 1000],
+            'n_estimators': [5, 100, 1000],
             'criterion': ['gini', 'entropy', 'log_loss'],
-            'max_depth': [None, 5, 10, 100, 1000],
-            'min_samples_leaf': [2, 5, 10, 20, 50, 70, 100],
-            'max_leaf_nodes': [None, 100, 70, 50, 20, 10, 5],
+            'max_depth': [5, 100, 1000],
+            'min_samples_leaf': [5, 100],
+            'max_leaf_nodes': [100, 50, 5]
         }
         self._grid_search(data, param_grid)

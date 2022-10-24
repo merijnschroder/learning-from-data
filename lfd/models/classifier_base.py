@@ -68,7 +68,7 @@ class BaseClassifier(abc.ABC):
         # Perform the grid-search.
         grid_search = GridSearchCV(
             self._classifier, param_grid, scoring='f1_weighted', n_jobs=1,
-            refit=False
+            refit=False, verbose=10
         )
         grid_search.fit(data.x_train, data.y_train)
 
