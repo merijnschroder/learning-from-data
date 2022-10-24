@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import sys
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from lfd import RUN_ID
 from lfd.models.classifier_base import BaseClassifier
@@ -99,6 +100,13 @@ def _parse_arguments() -> argparse.Namespace:
                         help='Train and evaluate all models')
     parser.add_argument('--verbose', action='store_true',
                         help='Write logs to the console')
+    parser.add_argument(
+        '--vectorizer',
+        type=str,
+        options=['bag-of-words', 'tfidf'],
+        default='bag-of-words',
+        help='The type of vectorizer to use for the models that require one'
+    )
 
     return parser.parse_args()
 
@@ -140,6 +148,8 @@ def _main():
 
     # Load the data.
     data = Data(args.train_data, args.dev_data, args.test_data)
+    if args.vectorizer == 'tfidf':
+        data.vectorizer = TfidfVectorizer
 
     if args.train or args.grid_search:
         classifiers: list[BaseClassifier]
