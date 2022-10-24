@@ -57,16 +57,16 @@ def _parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--train-data',
         type=str,
-        default='data/train.tsv',
+        default='data/original/train.tsv',
         help='The path of the file containing training data '
-        '(default: data/train.tsv)'
+        '(default: data/original/train.tsv)'
     )
     parser.add_argument(
         '--dev-data',
         type=str,
-        default='data/dev.tsv',
+        default='data/original/dev.tsv',
         help='The path of the file containing development data '
-        '(default: data/dev.tsv)'
+        '(default: data/original/dev.tsv)'
     )
     parser.add_argument(
         '--test-data',
