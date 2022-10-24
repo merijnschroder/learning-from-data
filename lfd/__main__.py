@@ -103,7 +103,7 @@ def _parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--vectorizer',
         type=str,
-        options=['bag-of-words', 'tfidf'],
+        choices=['bag-of-words', 'tfidf'],
         default='bag-of-words',
         help='The type of vectorizer to use for the models that require one'
     )
