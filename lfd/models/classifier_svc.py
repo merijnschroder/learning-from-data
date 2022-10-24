@@ -20,3 +20,4 @@ class SupportVectorClassifier(BaseClassifier):
     ):
         self._classifier = svm.SVC(C=C, kernel=kernel,
                                    random_state=RANDOM_STATE)
+        super().__init__()

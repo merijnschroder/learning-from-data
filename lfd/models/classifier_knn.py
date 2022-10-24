@@ -18,8 +18,9 @@ class KNearestNeighboursClassifier(BaseClassifier):
         distance_metric: Literal['euclidean', 'manhattan', 'cosine',
                                  'haversine', 'minkowski'] = 'minkowski'
     ):
-        self.classifier = KNeighborsClassifier(
+        self._classifier = KNeighborsClassifier(
             n_neighbors=n_neighbours,
             weights=weights,
             metric=distance_metric
         )
+        super().__init__()

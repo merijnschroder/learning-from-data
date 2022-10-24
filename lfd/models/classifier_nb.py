@@ -11,3 +11,4 @@ class NaiveBayesClassifier(BaseClassifier):
 
     def __init__(self, alpha: float = 1.0, fit_prior: bool = True):
         self._classifier = MultinomialNB(alpha=alpha, fit_prior=fit_prior)
+        super().__init__()
