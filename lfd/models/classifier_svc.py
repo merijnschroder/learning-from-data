@@ -25,7 +25,6 @@ class SupportVectorClassifier(BaseClassifier):
 
     def grid_search(self, data: Data):
         param_grid = {
-            'penalty': ['l1', 'l2'],
             'C': [0.1, 0.5, 1, 2, 5, 10, 50, 100],
             'kernel': ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed']
         }
