@@ -1,11 +1,12 @@
 import abc
 import logging
 import os
-from datetime import datetime
 import pickle
+from datetime import datetime
 
 from sklearn.base import BaseEstimator
 from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
 from lfd import RUN_ID
 from lfd.models.data import Data
 
@@ -56,6 +57,27 @@ class BaseClassifier(abc.ABC):
             self.classifier_name, len(data.y_test)
         )
         self._evaluate(data.x_test, data.y_test)
+
+    @abc.abstractmethod
+    def grid_search(self, data: Data):
+        '''Perform a grid-search on the training dataset.'''
+
+    def _grid_search(self, data: Data, param_grid: dict[str, list]):
+        logging.info('Starting grid-search for %s', self.classifier_name)
+
+        # Perform the grid-search.
+        grid_search = GridSearchCV(self._classifier, param_grid)
+        grid_search.fit(data.x_train, data.y_train)
+
+        # Write the results to a file.
+        results_file = f'{self.results_path}/grid-search.txt'
+        logging.info('Writing results to %s', results_file)
+        results = grid_search.cv_results_
+        scores = zip(results['params'], results['mean_test_score'])
+        with open(results_file, 'w', encoding='utf-8') as file:
+            file.writelines(str(s) + '\n' for s in scores)
+            file.write(f'\nBest parameters: {grid_search.best_params_} - '
+                       f'{grid_search.best_score_}')
 
     def _evaluate(self, x_test, y_test):
         '''Evaluate the classifier with the testing data.'''

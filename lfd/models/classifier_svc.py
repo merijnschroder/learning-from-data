@@ -4,6 +4,7 @@ from sklearn import svm
 from sklearn.base import BaseEstimator
 from lfd import RANDOM_STATE
 from lfd.models.classifier_base import BaseClassifier
+from lfd.models.data import Data
 
 
 class SupportVectorClassifier(BaseClassifier):
@@ -21,3 +22,11 @@ class SupportVectorClassifier(BaseClassifier):
         self._classifier = svm.SVC(C=C, kernel=kernel,
                                    random_state=RANDOM_STATE)
         super().__init__()
+
+    def grid_search(self, data: Data):
+        param_grid = {
+            'penalty': ['l1', 'l2'],
+            'C': [0.1, 0.5, 1, 2, 5, 10, 20, 50, 100],
+            'kernel': ['linear', 'poly', 'rbf', 'sigmoid', 'precomputed']
+        }
+        self._grid_search(data, param_grid)

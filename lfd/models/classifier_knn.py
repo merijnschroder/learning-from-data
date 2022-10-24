@@ -3,6 +3,7 @@ from typing import Literal
 from sklearn.base import BaseEstimator
 from sklearn.neighbors import KNeighborsClassifier
 from lfd.models.classifier_base import BaseClassifier
+from lfd.models.data import Data
 
 
 class KNearestNeighboursClassifier(BaseClassifier):
@@ -24,3 +25,12 @@ class KNearestNeighboursClassifier(BaseClassifier):
             metric=distance_metric
         )
         super().__init__()
+
+    def grid_search(self, data: Data):
+        param_grid = {
+            'n_neighbors': [1, 2, 3, 5, 8, 13, 21, 34, 55],
+            'weights': ['uniform', 'distance'],
+            'metric': ['euclidean', 'manhattan', 'cosine', 'haversine',
+                       'minkowski']
+        }
+        self._grid_search(data, param_grid)

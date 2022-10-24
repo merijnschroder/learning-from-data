@@ -4,6 +4,7 @@ from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier as SKClassifier
 from lfd import RANDOM_STATE
 from lfd.models.classifier_base import BaseClassifier
+from lfd.models.data import Data
 
 
 class RandomForestClassifier(BaseClassifier):
@@ -29,3 +30,13 @@ class RandomForestClassifier(BaseClassifier):
             random_state=RANDOM_STATE
         )
         super().__init__()
+
+    def grid_search(self, data: Data):
+        param_grid = {
+            'n_estimators': [5, 10, 50, 100, 500, 1000],
+            'criterion': ['gini', 'entropy', 'log_loss'],
+            'max_depth': [None, 5, 10, 100, 1000],
+            'min_samples_leaf': [2, 5, 10, 20, 50, 70, 100],
+            'max_leaf_nodes': [None, 100, 70, 50, 20, 10, 5],
+        }
+        self._grid_search(data, param_grid)

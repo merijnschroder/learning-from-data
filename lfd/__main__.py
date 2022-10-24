@@ -83,6 +83,12 @@ def _parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument('--print-dataset-statistics', action='store_true',
                         help='Print the statistics of the dataset')
+    parser.add_argument(
+        '--grid-search',
+        action='store_true',
+        help='Perform a grid-search on the specified model (should be '
+             'accompanied by --model or --all-models)'
+    )
 
     # Options
     parser.add_argument(
@@ -115,7 +121,7 @@ def _get_classifier(args: argparse.Namespace) -> BaseClassifier:
     sys.exit(1)
 
 
-def _run_classifier(classifier: BaseClassifier, data: Data) -> None:
+def _train_classifier(classifier: BaseClassifier, data: Data) -> None:
     logging.info('Running %s', classifier.classifier_name)
     classifier.train(data)
     classifier.evaluate_dev(data)
@@ -129,8 +135,8 @@ def _main():
     logging.info('Starting program (id: %s)', RUN_ID)
 
     # Check if the command line arguments are valid.
-    if not (args.train or args.print_dataset_statistics):
-        logging.error('Either run the program with --train or '
+    if not (args.train or args.grid_search or args.print_dataset_statistics):
+        logging.error('Either run the program with --train, --grid-search, or '
                       '--print-dataset-statistics')
         sys.exit(1)
 
@@ -138,19 +144,23 @@ def _main():
     data = Data(args.train_data, args.dev_data, args.test_data)
     data.vectorizer = TfidfVectorizer
 
-    if args.train:
+    if args.train or args.grid_search:
+        classifiers: list[BaseClassifier]
         if args.all_models:
             logging.info('Running all models')
             classifiers = [
-                KNearestNeighboursClassifier(), NaiveBayesClassifier(),  
+                KNearestNeighboursClassifier(), NaiveBayesClassifier(), 
                 NaiveBayesClassifier(), RandomForestClassifier(),
                 SupportVectorClassifier()
             ]
-            for classifier in classifiers:
-                _run_classifier(classifier, data)
         else:
-            classifier = _get_classifier(args)
-            _run_classifier(classifier, data)
+            classifiers = [_get_classifier(args)]
+
+        for classifier in classifiers:
+            if args.train:
+                _train_classifier(classifier, data)
+            if args.grid_search:
+                classifier.grid_search(data)
     elif args.print_dataset_statistics:
         data.print_statistics()
 
