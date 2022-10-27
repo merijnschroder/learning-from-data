@@ -3,11 +3,11 @@ from typing import Literal
 from sklearn import svm
 from sklearn.base import BaseEstimator
 from lfd import RANDOM_STATE
-from lfd.models.classifier_base import BaseClassifier
+from lfd.models.classifier_base import BaseBasicClassifier
 from lfd.models.data import Data
 
 
-class SupportVectorClassifier(BaseClassifier):
+class SupportVectorClassifier(BaseBasicClassifier):
     '''A Support Vector Classifier'''
 
     _classifier_name: str = 'SupportVectorClassifier'

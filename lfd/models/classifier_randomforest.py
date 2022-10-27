@@ -3,11 +3,11 @@ from typing import Literal, Optional
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier as SKClassifier
 from lfd import RANDOM_STATE
-from lfd.models.classifier_base import BaseClassifier
+from lfd.models.classifier_base import BaseBasicClassifier
 from lfd.models.data import Data
 
 
-class RandomForestClassifier(BaseClassifier):
+class RandomForestClassifier(BaseBasicClassifier):
     '''A Random Forest classifier'''
 
     _classifier_name: str = 'RandomForest'

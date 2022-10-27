@@ -10,6 +10,9 @@ from scipy.sparse import csr_matrix as sparse_row_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from lfd.helpers.data_helper import print_label_statistics
 
+from sklearn.preprocessing import LabelBinarizer
+from transformers import AutoTokenizer
+
 
 class Data:
     '''This class holds all data.'''
@@ -93,6 +96,27 @@ class Data:
         self._vectorizer = vectorizer()
         self._vectorizer.fit(self._vocabulary)
 
+    def lm_data(self, lm):
+        # Encode y_data (labels)
+        self.encoder = LabelBinarizer()
+        self.y_train_bin = LMDataOps().lm_encoder(y_data=self.y_train,
+                                                  encoder=self.encoder)
+        self.y_dev_bin = LMDataOps().lm_encoder(y_data=self.y_dev,
+                                                encoder=self.encoder)
+
+        # Tokenize x_data (texts)
+        self.tokens_train = LMDataOps().lm_tokenize(x_data=self._train_text,
+                                                    lm=lm)
+        self.tokens_dev = LMDataOps().lm_tokenize(x_data=self._dev_text,
+                                                  lm=lm)
+
+        # Perform similar operations on test if it exists
+        if self._test_text:
+            self.y_test_bin = LMDataOps().lm_encoder(y_data=self.y_test,
+                                                     encoder=self.encoder)
+            self.tokens_test = LMDataOps().lm_tokenize(x_data=self._test_text,
+                                                       lm=lm)
+
     def _has_test_data(self) -> bool:
         return len(self.y_test) > 0
 
@@ -110,3 +134,21 @@ class Data:
     x_train = property(fget=_get_x_train)
     x_dev = property(fget=_get_x_dev)
     x_test = property(fget=_get_x_test)
+
+
+class LMDataOps():
+    '''This class holds specific PLM operations'''
+    def __init__(self) -> None:
+        pass
+
+    def lm_encoder(self, y_data, encoder):
+        ''''''
+        return encoder.fit_transform(y_data)
+
+    def lm_tokenize(self, x_data, lm) -> None:
+        '''Tokenize a given set with current PLM tokenizer'''
+        tokenizer = AutoTokenizer.from_pretrained(lm)
+
+        return tokenizer(
+            x_data, padding=True, max_length=100, truncation=True,
+            return_tensors="np").data

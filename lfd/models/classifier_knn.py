@@ -2,11 +2,11 @@ from typing import Literal
 
 from sklearn.base import BaseEstimator
 from sklearn.neighbors import KNeighborsClassifier
-from lfd.models.classifier_base import BaseClassifier
+from lfd.models.classifier_base import BaseBasicClassifier
 from lfd.models.data import Data
 
 
-class KNearestNeighboursClassifier(BaseClassifier):
+class KNearestNeighboursClassifier(BaseBasicClassifier):
     '''A K-Nearest Neighbours classifier'''
 
     _classifier_name: str = 'KNearestNeighbours'

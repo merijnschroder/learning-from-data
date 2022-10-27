@@ -1,11 +1,11 @@
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.naive_bayes import MultinomialNB
-from lfd.models.classifier_base import BaseClassifier
+from lfd.models.classifier_base import BaseBasicClassifier
 from lfd.models.data import Data
 
 
-class NaiveBayesClassifier(BaseClassifier):
+class NaiveBayesClassifier(BaseBasicClassifier):
     '''A Naive Bayes classifier'''
 
     _classifier_name: str = 'NaiveBayes'

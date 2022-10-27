@@ -13,6 +13,7 @@ from lfd.models.classifier_knn import KNearestNeighboursClassifier
 from lfd.models.classifier_nb import NaiveBayesClassifier
 from lfd.models.classifier_randomforest import RandomForestClassifier
 from lfd.models.classifier_svc import SupportVectorClassifier
+from lfd.models.classifier_lm import LanguageModelClassifier
 
 
 def _set_up_logger(verbose: bool) -> None:
@@ -93,8 +94,16 @@ def _parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--model',
         type=str,
-        choices=['knn', 'nb', 'randomforest', 'svc'],
+        choices=['knn', 'nb', 'randomforest', 'svc', 'PLM'],
         help='The model to train'
+    )
+    parser.add_argument(
+        '--specific-lm',
+        type=str,
+        choices=['bert-base-uncased'],
+        default='bert-base-uncased',
+        help='The specific Pre-trained Language Model (PLM) '
+        '(default = bert-base-uncased)'
     )
     parser.add_argument('--all-models', action='store_true',
                         help='Train and evaluate all models')
@@ -123,6 +132,8 @@ def _get_classifier(args: argparse.Namespace) -> BaseClassifier:
         return RandomForestClassifier()
     if args.model == 'svc':
         return SupportVectorClassifier()
+    if args.model == 'PLM':
+        return LanguageModelClassifier(lm=args.specific_lm)
     logging.error('Unknown model %s.', args.model)
     sys.exit(1)
 
@@ -151,12 +162,15 @@ def _main():
     if args.vectorizer == 'tfidf':
         data.vectorizer = TfidfVectorizer
 
+    if args.model == 'PLM':
+        data.lm_data(args.specific_lm)
+
     if args.train or args.grid_search:
         classifiers: list[BaseClassifier]
         if args.all_models:
             logging.info('Running all models')
             classifiers = [
-                KNearestNeighboursClassifier(), NaiveBayesClassifier(), 
+                KNearestNeighboursClassifier(), NaiveBayesClassifier(),
                 RandomForestClassifier(), SupportVectorClassifier()
             ]
         else:
