@@ -101,8 +101,6 @@ class BaseClassifier(abc.ABC):
         if not hasattr(self._classifier, 'fit'):
             raise TypeError('Invalid classifier: not implementing \'predict\'')
 
-        logging.info('Start evaluating %s on %d data points',
-                     self.classifier_name, x_test.shape[0])
         predicted = self._evaluation_prediction(x_test)  # type: ignore
         report = classification_report(y_test, predicted)
 
@@ -147,6 +145,8 @@ class BaseBasicClassifier(BaseClassifier):
         self._evaluate(data.x_test, data.y_test)
 
     def _evaluation_prediction(self, x_test):
+        logging.info('Start evaluating %s on %d data points',
+                     self.classifier_name, x_test.shape[0])
         return self._classifier.predict(x_test)  # type: ignore
 
     def _grid_search_fitting(self, grid_search, data):
@@ -178,6 +178,8 @@ class BaseLMClassifier(BaseClassifier):
         self._evaluate(data.tokens_test, data.y_test_bin)
 
     def _evaluation_prediction(self, x_test):
+        logging.info('Start evaluating %s on the data points',
+                     self.classifier_name)
         output = self._classifier.predict(x_test)["logits"]
         return tf.round(tf.nn.sigmoid(output))
 
