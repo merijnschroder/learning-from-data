@@ -16,9 +16,9 @@ from lfd.helpers.data_helper import print_label_statistics
 class Data:
     '''This class holds all data.'''
 
-    y_train: list[bool]
-    y_dev: list[bool]
-    y_test: list[bool] = []
+    _y_train: list[bool]
+    _y_dev: list[bool]
+    _y_test: list[bool] = []
 
     _train_text: list[str]
     _dev_text: list[str]
@@ -30,11 +30,11 @@ class Data:
     def __init__(self, train_file: str, dev_file: str, test_file: str):
         # Load the data from the data files.
         logging.info('Start loading data')
-        self._train_text, self.y_train = self._read_data_from_file(train_file)
-        self._dev_text, self.y_dev = self._read_data_from_file(dev_file)
+        self._train_text, self._y_train = self._read_data_from_file(train_file)
+        self._dev_text, self._y_dev = self._read_data_from_file(dev_file)
         self._test_text = []
         if test_file is not None:
-            self._test_text, self.y_test = self._read_data_from_file(test_file)
+            self._test_text, self._y_test = self._read_data_from_file(test_file)
 
         # Set the default vectorizer.
         self._vocabulary = np.unique(
@@ -51,16 +51,34 @@ class Data:
         print('\nClass distribution')
 
         print('\nFull dataset')
-        print_label_statistics(self.y_train + self.y_dev + self.y_test)
+        print_label_statistics(self._y_train + self._y_dev + self._y_test)
 
         print('\nTrain')
-        print_label_statistics(self.y_train)
+        print_label_statistics(self._y_train)
 
         print('\nDev')
-        print_label_statistics(self.y_dev)
+        print_label_statistics(self._y_dev)
 
         print('\nTest')
-        print_label_statistics(self.y_test)
+        print_label_statistics(self._y_test)
+
+    def get_x_train(self, plm_name: str = ''):
+        return self._transform_text(self._train_text, plm_name)
+
+    def get_x_dev(self, plm_name: str = ''):
+        return self._transform_text(self._dev_text, plm_name)
+
+    def get_x_test(self, plm_name: str = ''):
+        return self._transform_text(self._test_text, plm_name)
+
+    def get_y_train(self, encoded: bool = False):
+        return self._transform_labels(self._y_train, encoded)
+
+    def get_y_dev(self, encoded: bool = False):
+        return self._transform_labels(self._y_dev, encoded)
+
+    def get_y_test(self, encoded: bool = False):
+        return self._transform_labels(self._y_test, encoded)
 
     def _read_data_from_file(
             self, data_file_path: str) -> tuple[list[str], list[bool]]:
@@ -87,52 +105,34 @@ class Data:
 
         return features, labels
 
+    def _transform_text(self, text: list[str], plm_name: str):
+        if plm_name == '':
+            return self._vectorize_text(text)
+        else:
+            return self._tokenize_text(text, plm_name)
+
+    def _transform_labels(self, labels: list[bool], encoded: bool):
+        if encoded:
+            return LMDataOps().lm_encoder(labels, LabelBinarizer())
+        else:
+            return labels
+
     def _vectorize_text(self, text: list[str]) -> sparse_row_matrix:
         return self._vectorizer.transform(text)
+
+    def _tokenize_text(self, text: list[str], plm_name: str) -> dict:
+        return LMDataOps().lm_tokenize(text, plm_name)
 
     def _set_vectorizer(self, vectorizer: Type[CountVectorizer]):
         logging.info('Setting custom vectorizer: %s', vectorizer.__name__)
         self._vectorizer = vectorizer()
         self._vectorizer.fit(self._vocabulary)
 
-    def lm_data(self, lm):
-        # Encode y_data (labels)
-        self.encoder = LabelBinarizer()
-        self.y_train_bin = LMDataOps().lm_encoder(y_data=self.y_train,
-                                                  encoder=self.encoder)
-        self.y_dev_bin = LMDataOps().lm_encoder(y_data=self.y_dev,
-                                                encoder=self.encoder)
-
-        # Tokenize x_data (texts)
-        self.tokens_train = LMDataOps().lm_tokenize(x_data=self._train_text,
-                                                    lm=lm)
-        self.tokens_dev = LMDataOps().lm_tokenize(x_data=self._dev_text,
-                                                  lm=lm)
-
-        # Perform similar operations on test if it exists
-        if self._test_text:
-            self.y_test_bin = LMDataOps().lm_encoder(y_data=self.y_test,
-                                                     encoder=self.encoder)
-            self.tokens_test = LMDataOps().lm_tokenize(x_data=self._test_text,
-                                                       lm=lm)
-
     def _has_test_data(self) -> bool:
-        return len(self.y_test) > 0
-
-    def _get_x_train(self) -> sparse_row_matrix:
-        return self._vectorize_text(self._train_text)
-
-    def _get_x_dev(self) -> sparse_row_matrix:
-        return self._vectorize_text(self._dev_text)
-
-    def _get_x_test(self) -> sparse_row_matrix:
-        return self._vectorize_text(self._test_text)
+        return len(self._y_test) > 0
 
     vectorizer = property(fset=_set_vectorizer)
     has_test_data = property(fget=_has_test_data)
-    x_train = property(fget=_get_x_train)
-    x_dev = property(fget=_get_x_dev)
-    x_test = property(fget=_get_x_test)
 
 
 class LMDataOps():
@@ -145,9 +145,9 @@ class LMDataOps():
         ''''''
         return encoder.fit_transform(y_data)
 
-    def lm_tokenize(self, x_data, lm) -> None:
+    def lm_tokenize(self, x_data, plm_name: str) -> dict:
         '''Tokenize a given set with current PLM tokenizer'''
-        tokenizer = AutoTokenizer.from_pretrained(lm)
+        tokenizer = AutoTokenizer.from_pretrained(plm_name)
 
         return tokenizer(
             x_data, padding=True, max_length=100, truncation=True,

@@ -1,4 +1,5 @@
 import logging
+
 import tensorflow as tf
 from lfd.models.classifier_base import BaseClassifier
 from lfd.models.data import Data
@@ -11,7 +12,7 @@ class LanguageModelClassifier(BaseClassifier):
 
     classifier_id: str
     _model_name: str
-    _classifier_name: str = 'PLM'
+    _classifier_name: str
     _classifier: PreTrainedModel
     _model_verbosity: int
     _training_verbosity: int
@@ -25,7 +26,7 @@ class LanguageModelClassifier(BaseClassifier):
         learning_rate=0.00005
     ) -> None:
         self._model_name = model_name
-        self._classifier_name += f'_{model_name}'
+        self._classifier_name = f'PLM_{model_name}'
         self._model_verbosity = model_verbosity
         self._training_verbosity = training_verbosity
         self._classifier = \
@@ -45,10 +46,12 @@ class LanguageModelClassifier(BaseClassifier):
         return model
 
     def evaluate_dev(self, data: Data):
-        self._evaluate(data.tokens_dev, data.y_dev_bin)
+        self._evaluate(
+            data.get_x_dev(self._model_name), data.get_y_dev(True))
 
     def evaluate_test(self, data: Data):
-        self._evaluate(data.tokens_test, data.y_test_bin)
+        self._evaluate(
+            data.get_x_test(self._model_name), data.get_y_test(True))
 
     def grid_search(self, data: Data):
         param_grid = {
@@ -60,10 +63,11 @@ class LanguageModelClassifier(BaseClassifier):
 
     @override
     def _train(self, data: Data):
-        validation_data = (data.tokens_dev, data.y_dev_bin)
+        validation_data = (
+            data.get_x_dev(self._model_name), data.get_y_dev(True))
         self._classifier.fit(
-            data.tokens_train,
-            data.y_train_bin,
+            data.get_x_train(self._model_name),
+            data.get_y_train(True),
             verbose=self._training_verbosity,
             epochs=1,
             batch_size=16,
@@ -79,4 +83,5 @@ class LanguageModelClassifier(BaseClassifier):
 
     @override
     def _grid_search_fitting(self, grid_search, data):
-        grid_search.fit(data.tokens_train, data.y_train_bin)
+        grid_search.fit(
+            data.get_x_train(self._model_name), data.get_y_train(True))

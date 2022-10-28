@@ -42,22 +42,10 @@ class BaseClassifier(abc.ABC):
     @abc.abstractmethod
     def evaluate_dev(self, data: Data):
         '''Evaluate the classifier on the development set.'''
-        logging.info(
-            'Start evaluating %s on the development set with %d data points',
-            self.classifier_name, len(data.y_dev)
-        )
 
     @abc.abstractmethod
     def evaluate_test(self, data: Data):
         '''Evaluate the classifier on the test set.'''
-        if not data.has_test_data:
-            logging.error('No test data available to evaluate the model with')
-            return
-
-        logging.info(
-            'Start evaluating %s on the test set with %d data points',
-            self.classifier_name, len(data.y_test)
-        )
 
     @abc.abstractmethod
     def grid_search(self, data: Data):
@@ -100,7 +88,7 @@ class BaseClassifier(abc.ABC):
         if not hasattr(self._classifier, 'fit'):
             raise TypeError('Invalid classifier: not implementing \'predict\'')
 
-        predicted = self._evaluation_prediction(x_test)  # type: ignore
+        predicted = self._evaluation_prediction(x_test)
         report = classification_report(y_test, predicted)
 
         file_path = f'{self.results_path}/report.txt'
@@ -135,13 +123,14 @@ class BaseBasicClassifier(BaseClassifier):
     _is_trained: bool = False
 
     def evaluate_dev(self, data: Data):
-        self._evaluate(data.x_dev, data.y_dev)
+        self._evaluate(data.get_x_dev(), data.get_y_dev())
 
     def evaluate_test(self, data: Data):
-        self._evaluate(data.x_test, data.y_test)
+        self._evaluate(data.get_x_test(), data.get_y_test())
 
     def _train(self, data):
-        self._classifier.fit(data.x_train, data.y_train)  # type: ignore
+        self._classifier.fit(  # type: ignore
+            data.get_x_train(), data.get_y_train())
 
     def _evaluation_prediction(self, x_test):
         logging.info('Start evaluating %s on %d data points',
@@ -149,4 +138,4 @@ class BaseBasicClassifier(BaseClassifier):
         return self._classifier.predict(x_test)  # type: ignore
 
     def _grid_search_fitting(self, grid_search, data):
-        grid_search.fit(data.x_train, data.y_train)
+        grid_search.fit(data.get_x_train(), data.get_y_train())

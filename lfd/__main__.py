@@ -71,9 +71,6 @@ def _main():
     if args.vectorizer == 'tfidf':
         data.vectorizer = TfidfVectorizer
 
-    if args.model == 'plm':
-        data.lm_data(args.language_model)
-
     if args.train or args.grid_search:
         classifiers: list[BaseClassifier]
         if args.all_models:
