@@ -7,10 +7,9 @@ from datetime import datetime
 from sklearn.base import BaseEstimator
 from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
+from transformers import PreTrainedModel
 from lfd import RUN_ID
 from lfd.models.data import Data
-
-import tensorflow as tf
 
 
 class BaseClassifier(abc.ABC):
@@ -18,7 +17,7 @@ class BaseClassifier(abc.ABC):
 
     classifier_id: str
     _classifier_name: str
-    _classifier: BaseEstimator
+    _classifier: BaseEstimator | PreTrainedModel
     _is_trained: bool = False
 
     def __init__(self):
@@ -31,7 +30,7 @@ class BaseClassifier(abc.ABC):
             raise TypeError('Invalid classifier: not implementing \'fit\'')
 
         logging.info('Start training classifier: %s', self.classifier_name)
-        self._train_fitting(data)
+        self._train(data)
         self._is_trained = True
 
         # Save the classifier as a file.
@@ -39,10 +38,6 @@ class BaseClassifier(abc.ABC):
         logging.info('Save trained classifier to %s', file_path)
         with open(file_path, 'wb') as file:
             pickle.dump(self._classifier, file)
-
-    @abc.abstractmethod
-    def _train_fitting(self, data):
-        '''Perform a specialized fit on a model depending on its type'''
 
     @abc.abstractmethod
     def evaluate_dev(self, data: Data):
@@ -67,6 +62,10 @@ class BaseClassifier(abc.ABC):
     @abc.abstractmethod
     def grid_search(self, data: Data):
         '''Perform a grid-search on the training dataset.'''
+
+    @abc.abstractmethod
+    def _train(self, data):
+        '''Perform a specialized fit on a model depending on its type'''
 
     def _grid_search(self, data: Data, param_grid: dict[str, list]):
         logging.info('Starting grid-search for %s', self.classifier_name)
@@ -135,14 +134,14 @@ class BaseBasicClassifier(BaseClassifier):
     _classifier: BaseEstimator
     _is_trained: bool = False
 
-    def _train_fitting(self, data):
-        self._classifier.fit(data.x_train, data.y_train)  # type: ignore
-
     def evaluate_dev(self, data: Data):
         self._evaluate(data.x_dev, data.y_dev)
 
     def evaluate_test(self, data: Data):
         self._evaluate(data.x_test, data.y_test)
+
+    def _train(self, data):
+        self._classifier.fit(data.x_train, data.y_train)  # type: ignore
 
     def _evaluation_prediction(self, x_test):
         logging.info('Start evaluating %s on %d data points',
@@ -151,37 +150,3 @@ class BaseBasicClassifier(BaseClassifier):
 
     def _grid_search_fitting(self, grid_search, data):
         grid_search.fit(data.x_train, data.y_train)
-
-
-class BaseLMClassifier(BaseClassifier):
-    '''A base class for a pre-trained language model classifier'''
-
-    classifier_id: str
-    _classifier_name: str
-    _classifier: BaseEstimator
-    _is_trained: bool = False
-
-    def _train_fitting(self, data):
-        validation_data = (data.tokens_dev, data.y_dev_bin)
-
-        self._classifier.fit(data.tokens_train,
-                             data.y_train_bin,
-                             verbose=self.training_verbosity,
-                             epochs=1,
-                             batch_size=16,
-                             validation_data=validation_data)
-
-    def evaluate_dev(self, data: Data):
-        self._evaluate(data.tokens_dev, data.y_dev_bin)
-
-    def evaluate_test(self, data: Data):
-        self._evaluate(data.tokens_test, data.y_test_bin)
-
-    def _evaluation_prediction(self, x_test):
-        logging.info('Start evaluating %s on the data points',
-                     self.classifier_name)
-        output = self._classifier.predict(x_test)["logits"]
-        return tf.round(tf.nn.sigmoid(output))
-
-    def _grid_search_fitting(self, grid_search, data):
-        grid_search.fit(data.tokens_train, data.y_train_bin)

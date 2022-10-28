@@ -1,19 +1,19 @@
 '''This module is the main entry point for the program.'''
 
-import argparse
 import logging
 import os
 import sys
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from lfd import RUN_ID
+from lfd.helpers import args_helper
 from lfd.models.classifier_base import BaseClassifier
-from lfd.models.data import Data
 from lfd.models.classifier_knn import KNearestNeighboursClassifier
 from lfd.models.classifier_nb import NaiveBayesClassifier
 from lfd.models.classifier_randomforest import RandomForestClassifier
 from lfd.models.classifier_svc import SupportVectorClassifier
-from lfd.models.classifier_lm import LanguageModelClassifier
+from lfd.models.data import Data
 
 
 def _set_up_logger(verbose: bool) -> None:
@@ -49,95 +49,6 @@ def _set_up_logger(verbose: bool) -> None:
     )
 
 
-def _parse_arguments() -> argparse.Namespace:
-    '''Parse the command line arguments.'''
-    parser = argparse.ArgumentParser()
-
-    # Data files
-    parser.add_argument(
-        '--train-data',
-        type=str,
-        default='data/original/train.tsv',
-        help='The path of the file containing training data '
-        '(default: data/original/train.tsv)'
-    )
-    parser.add_argument(
-        '--dev-data',
-        type=str,
-        default='data/original/dev.tsv',
-        help='The path of the file containing development data '
-        '(default: data/original/dev.tsv)'
-    )
-    parser.add_argument(
-        '--test-data',
-        type=str,
-        help='The path of the file containing testing data'
-    )
-
-    # Run modes
-    parser.add_argument(
-        '--train',
-        action='store_true',
-        help='Train and evaluate the specified model (should be accompanied '
-             'by --model or --all-models)'
-    )
-    parser.add_argument('--print-dataset-statistics', action='store_true',
-                        help='Print the statistics of the dataset')
-    parser.add_argument(
-        '--grid-search',
-        action='store_true',
-        help='Perform a grid-search on the specified model (should be '
-             'accompanied by --model or --all-models)'
-    )
-
-    # Options
-    parser.add_argument(
-        '--model',
-        type=str,
-        choices=['knn', 'nb', 'randomforest', 'svc', 'PLM'],
-        help='The model to train'
-    )
-    parser.add_argument(
-        '--specific-lm',
-        type=str,
-        choices=['bert-base-uncased'],
-        default='bert-base-uncased',
-        help='The specific Pre-trained Language Model (PLM) '
-        '(default = bert-base-uncased)'
-    )
-    parser.add_argument('--all-models', action='store_true',
-                        help='Train and evaluate all models')
-    parser.add_argument('--verbose', action='store_true',
-                        help='Write logs to the console')
-    parser.add_argument(
-        '--vectorizer',
-        type=str,
-        choices=['bag-of-words', 'tfidf'],
-        default='bag-of-words',
-        help='The type of vectorizer to use for the models that require one'
-    )
-
-    return parser.parse_args()
-
-
-def _get_classifier(args: argparse.Namespace) -> BaseClassifier:
-    if args.model is None:
-        logging.error('Please specify --model')
-        sys.exit(1)
-    if args.model == 'knn':
-        return KNearestNeighboursClassifier()
-    if args.model == 'nb':
-        return NaiveBayesClassifier()
-    if args.model == 'randomforest':
-        return RandomForestClassifier()
-    if args.model == 'svc':
-        return SupportVectorClassifier()
-    if args.model == 'PLM':
-        return LanguageModelClassifier(lm=args.specific_lm)
-    logging.error('Unknown model %s.', args.model)
-    sys.exit(1)
-
-
 def _train_classifier(classifier: BaseClassifier, data: Data) -> None:
     logging.info('Running %s', classifier.classifier_name)
     classifier.train(data)
@@ -147,14 +58,12 @@ def _train_classifier(classifier: BaseClassifier, data: Data) -> None:
 
 
 def _main():
-    args = _parse_arguments()
+    args = args_helper.parse_arguments()
     _set_up_logger(args.verbose)
     logging.info('Starting program (id: %s)', RUN_ID)
 
     # Check if the command line arguments are valid.
-    if not (args.train or args.grid_search or args.print_dataset_statistics):
-        logging.error('Either run the program with --train, --grid-search, or '
-                      '--print-dataset-statistics')
+    if not args_helper.is_valid(args):
         sys.exit(1)
 
     # Load the data.
@@ -162,8 +71,8 @@ def _main():
     if args.vectorizer == 'tfidf':
         data.vectorizer = TfidfVectorizer
 
-    if args.model == 'PLM':
-        data.lm_data(args.specific_lm)
+    if args.model == 'plm':
+        data.lm_data(args.language_model)
 
     if args.train or args.grid_search:
         classifiers: list[BaseClassifier]
@@ -174,7 +83,10 @@ def _main():
                 RandomForestClassifier(), SupportVectorClassifier()
             ]
         else:
-            classifiers = [_get_classifier(args)]
+            classifier = args_helper.get_classifier(args)
+            if classifier is None:
+                sys.exit(1)
+            classifiers = [classifier]
 
         for classifier in classifiers:
             if args.train:

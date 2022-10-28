@@ -8,10 +8,9 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.sparse import csr_matrix as sparse_row_matrix
 from sklearn.feature_extraction.text import CountVectorizer
-from lfd.helpers.data_helper import print_label_statistics
-
 from sklearn.preprocessing import LabelBinarizer
 from transformers import AutoTokenizer
+from lfd.helpers.data_helper import print_label_statistics
 
 
 class Data:
@@ -138,6 +137,7 @@ class Data:
 
 class LMDataOps():
     '''This class holds specific PLM operations'''
+
     def __init__(self) -> None:
         pass
 
