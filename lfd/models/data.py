@@ -80,6 +80,10 @@ class Data:
     def get_y_test(self, encoded: bool = False):
         return self._transform_labels(self._y_test, encoded)
 
+    def _get_vocabulary(self):
+        voc = self._vectorizer.vocabulary_
+        return list(voc.keys())
+
     def _read_data_from_file(
             self, data_file_path: str) -> tuple[list[str], list[bool]]:
         '''Read the data from the data file.'''
@@ -133,6 +137,7 @@ class Data:
 
     vectorizer = property(fset=_set_vectorizer)
     has_test_data = property(fget=_has_test_data)
+    voc = property(fget=_get_vocabulary)
 
 
 class LMDataOps():

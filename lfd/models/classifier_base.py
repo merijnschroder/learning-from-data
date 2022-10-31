@@ -11,7 +11,6 @@ from transformers import PreTrainedModel
 from lfd import RUN_ID
 from lfd.models.data import Data
 
-
 class BaseClassifier(abc.ABC):
     '''A base class for a classifier'''
 

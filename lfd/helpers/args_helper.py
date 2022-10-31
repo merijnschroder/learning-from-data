@@ -5,9 +5,12 @@ import logging
 from lfd.models.classifier_base import BaseClassifier
 from lfd.models.classifier_knn import KNearestNeighboursClassifier
 from lfd.models.classifier_lm import LanguageModelClassifier
+from lfd.models.classifier_lstm import LSTMClassifier
 from lfd.models.classifier_nb import NaiveBayesClassifier
 from lfd.models.classifier_randomforest import RandomForestClassifier
 from lfd.models.classifier_svc import SupportVectorClassifier
+
+from lfd.models.data import Data
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -55,7 +58,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--model',
         type=str,
-        choices=['knn', 'nb', 'randomforest', 'svc', 'plm'],
+        choices=['knn', 'nb', 'randomforest', 'svc', 'lstm', 'plm'],
         help='The type of model to train'
     )
     parser.add_argument(
@@ -91,7 +94,7 @@ def is_valid(args: argparse.Namespace) -> bool:
     return True
 
 
-def get_classifier(args: argparse.Namespace) -> BaseClassifier | None:
+def get_classifier(args: argparse.Namespace, data: Data=None) -> BaseClassifier | None:
     '''Get the correct classifier based on the command line arguments.'''
     if args.model is None:
         logging.error('Please specify --model')
@@ -104,6 +107,8 @@ def get_classifier(args: argparse.Namespace) -> BaseClassifier | None:
         return RandomForestClassifier()
     if args.model == 'svc':
         return SupportVectorClassifier()
+    if args.model == 'lstm':
+        return LSTMClassifier(data)
     if args.model == 'plm':
         return LanguageModelClassifier(model_name=args.language_model)
     logging.error('Unknown model %s.', args.model)
