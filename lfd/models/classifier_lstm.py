@@ -24,14 +24,31 @@ class LSTMClassifier(BaseClassifier):
     def __init__(
         self,
         data: Data,
-        optimizer='SGD',
-        learning_rate=0.005,
+        optimizer='Adam',
+        learning_rate=1e-05,
         non_pretrained_embeddings=False,
-        trainable_embeddings=False,
-        architecture='3',
-        bidirectional=False
-
+        trainable_embeddings=True,
+        architecture='300.3r',
+        bidirectional=True,
+        epochs=50,
+        batch_size=16
     ) -> None:
+        self.epochs = epochs
+        self.batch_size = batch_size
+
+        logging.info(
+            'The settings that are used '
+            'for the LSTM model are:\n'
+            f'{"optimizer:":<29}{optimizer}\n'
+            f'{"learning rate:":<29}{learning_rate}\n'
+            f'{"non pretrained embeddings:":<29}'
+            f'{non_pretrained_embeddings}\n'
+            f'{"trainable embeddings:":<29}{trainable_embeddings}\n'
+            f'{"architecture:":<29}{architecture}\n'
+            f'{"bidirectional:":<29}{bidirectional}\n'
+            f'{"epochs:":<29}{epochs}\n'
+            f'{"batch size:":<29}{batch_size}'
+        )
         self._classifier = self.create_model(
                 data=data,
                 optimizer=optimizer,
@@ -114,7 +131,7 @@ class LSTMClassifier(BaseClassifier):
         # Ultimately, end with dense layer with softmax
         model.add(Dense(
             input_dim=embedding_dim, units=output_layer_size,
-            activation="softmax"))
+            activation="sigmoid"))
 
         # Compile model using our settings, check for accuracy
         model.compile(loss=loss_function, optimizer=optim,
@@ -183,28 +200,31 @@ class LSTMClassifier(BaseClassifier):
         return embedding_matrix
 
     def evaluate_dev(self, data: Data):
-        self._evaluate(data.get_x_dev().toarray(), data.get_y_dev(encoded=True))
+        self._evaluate(data.get_x_dev(), data.get_y_dev(encoded=True))
 
     def evaluate_test(self, data: Data):
-        self._evaluate(data.get_x_test().toarray(), data.get_y_test(encoded=True))
+        self._evaluate(data.get_x_test(), data.get_y_test(encoded=True))
 
     def _train(self, data):
         callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss',
                                                     patience=3)
         self._classifier.fit(  # type: ignore
-            data.get_x_train().toarray(),
+            data.get_x_train(),
             data.get_y_train(encoded=True),
             verbose=1,
-            epochs=1,
+            epochs=self.epochs,
             callbacks=[callback],
-            batch_size=12,
-            validation_data=(data.get_x_dev().toarray(), data.get_y_dev(encoded=True)),
+            batch_size=self.batch_size,
+            validation_data=(data.get_x_dev(), data.get_y_dev(encoded=True)),
         )
+        self.encoder = data.encoder
 
     def _evaluation_prediction(self, x_test):
         logging.info('Start evaluating %s on %d data points',
                      self.classifier_name, x_test.shape[0])
-        return self._classifier.predict(x_test)  # type: ignore
+        # return self._classifier.predict(x_test)  # type: ignore
+        return self.encoder.inverse_transform(self._classifier.predict(x_test))  # type: ignore
 
     def _grid_search_fitting(self, grid_search, data):
-        grid_search.fit(data.get_x_train().toarray(), data.get_y_train(encoded=True))
+        # grid_search.fit(data.get_x_train().toarray(), data.get_y_train(encoded=True))
+        grid_search.fit(data.get_x_train(), data.get_y_train(encoded=True))

@@ -11,6 +11,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import LabelBinarizer
 from transformers import AutoTokenizer
 from lfd.helpers.data_helper import print_label_statistics
+from tensorflow.keras.layers import TextVectorization
+import tensorflow as tf
 
 
 class Data:
@@ -36,7 +38,11 @@ class Data:
         if test_file is not None:
             self._test_text, self._y_test = self._read_data_from_file(test_file)
 
-        # Set the default vectorizer.
+        self._default_vectorizer()
+
+    def _default_vectorizer(self):
+        '''Set the default vectorizer.'''
+        logging.info('Using the default Vectorization pipeline')
         self._vocabulary = np.unique(
             self._train_text + self._dev_text + self._test_text)
         self._vectorizer = CountVectorizer()
@@ -117,7 +123,8 @@ class Data:
 
     def _transform_labels(self, labels: list[bool], encoded: bool):
         if encoded:
-            return LMDataOps().lm_encoder(labels, LabelBinarizer())
+            self.encoder = LabelBinarizer()
+            return self.encoder.fit_transform(labels)
         else:
             return labels
 
@@ -139,6 +146,28 @@ class Data:
     has_test_data = property(fget=_has_test_data)
     voc = property(fget=_get_vocabulary)
 
+class DataLSTM(Data):
+    ''''''
+    def _default_vectorizer(self):
+        logging.info('Using LSTM Vectorization pipeline')
+        self._text_ds = tf.data.Dataset.from_tensor_slices(self._train_text
+                                                     + self._dev_text)
+        self._vocabulary = np.unique(
+            self._train_text + self._dev_text + self._test_text)
+        self._vectorizer = TextVectorization(
+            standardize=None,
+            output_sequence_length=50
+        )
+        self._vectorizer.adapt(self._text_ds)
+        self._vocabulary = self._vectorizer.get_vocabulary()
+
+    def _get_vocabulary(self):
+        return self._vocabulary
+
+    def _transform_text(self, text: list[str], plm_name: str):
+        return self._vectorizer(np.array([[s] for s in text])).numpy()
+
+    voc = property(fget=_get_vocabulary)
 
 class LMDataOps():
     '''This class holds specific PLM operations'''

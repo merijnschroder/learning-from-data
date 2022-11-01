@@ -13,7 +13,7 @@ from lfd.models.classifier_knn import KNearestNeighboursClassifier
 from lfd.models.classifier_nb import NaiveBayesClassifier
 from lfd.models.classifier_randomforest import RandomForestClassifier
 from lfd.models.classifier_svc import SupportVectorClassifier
-from lfd.models.data import Data
+from lfd.models.data import Data, DataLSTM
 
 
 def _set_up_logger(verbose: bool) -> None:
@@ -67,9 +67,12 @@ def _main():
         sys.exit(1)
 
     # Load the data.
-    data = Data(args.train_data, args.dev_data, args.test_data)
-    if args.vectorizer == 'tfidf':
-        data.vectorizer = TfidfVectorizer
+    if args.model == 'lstm':
+        data = DataLSTM(args.train_data, args.dev_data, args.test_data)
+    else:
+        data = Data(args.train_data, args.dev_data, args.test_data)
+        if args.vectorizer == 'tfidf':
+            data.vectorizer = TfidfVectorizer
 
     if args.train or args.grid_search:
         classifiers: list[BaseClassifier]
