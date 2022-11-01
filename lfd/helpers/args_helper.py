@@ -21,7 +21,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--train-data',
         type=str,
-        default='data/original/train.tsv',
+        default='data/deduplicated/train.tsv',
         help='The path of the file containing training data '
         '(default: data/deduplicated/train.tsv)'
     )
