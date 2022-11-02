@@ -1,8 +1,16 @@
+'''
+This script takes a confusion matrix .json file as '--input' and prints
+an equivalent .png version (in the same folder as the input file)
+for publishing.
+'''
+
+
 import json
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import ConfusionMatrixDisplay
 import argparse
+
 
 def parse_arguments() -> argparse.Namespace:
     '''Parse the command line arguments.'''
@@ -17,6 +25,7 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     return parser.parse_args()
+
 
 def json_importer(file_location) -> list:
     '''Import a .json as an array'''
