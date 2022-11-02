@@ -9,7 +9,6 @@ from lfd.models.classifier_lstm import LSTMClassifier
 from lfd.models.classifier_nb import NaiveBayesClassifier
 from lfd.models.classifier_randomforest import RandomForestClassifier
 from lfd.models.classifier_svc import SupportVectorClassifier
-
 from lfd.models.data import Data
 
 
@@ -94,7 +93,8 @@ def is_valid(args: argparse.Namespace) -> bool:
     return True
 
 
-def get_classifier(args: argparse.Namespace, data: Data=None) -> BaseClassifier | None:
+def get_classifier(args: argparse.Namespace,
+                   data: Data) -> BaseClassifier | None:
     '''Get the correct classifier based on the command line arguments.'''
     if args.model is None:
         logging.error('Please specify --model')

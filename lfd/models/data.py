@@ -5,14 +5,13 @@ import os
 from typing import Type
 
 import numpy as np
+import tensorflow as tf
+from keras.layers import TextVectorization
 from numpy.typing import NDArray
 from scipy.sparse import csr_matrix as sparse_row_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import LabelBinarizer
-from transformers import AutoTokenizer
-from lfd.helpers.data_helper import print_label_statistics
-from tensorflow.keras.layers import TextVectorization
-import tensorflow as tf
+from lfd.helpers.data_helper import plm_tokenize, print_label_statistics
 
 
 class Data:
@@ -27,7 +26,7 @@ class Data:
     _test_text: list[str]
 
     _vocabulary: NDArray
-    _vectorizer: CountVectorizer = CountVectorizer()
+    _vectorizer: CountVectorizer
 
     def __init__(self, train_file: str, dev_file: str, test_file: str):
         # Load the data from the data files.
@@ -36,8 +35,8 @@ class Data:
         self._dev_text, self._y_dev = self._read_data_from_file(dev_file)
         self._test_text = []
         if test_file is not None:
-            self._test_text, self._y_test = self._read_data_from_file(test_file)
-
+            self._test_text, self._y_test = self._read_data_from_file(
+                test_file)
         self._default_vectorizer()
 
     def _default_vectorizer(self):
@@ -123,8 +122,8 @@ class Data:
 
     def _transform_labels(self, labels: list[bool], encoded: bool):
         if encoded:
-            self.encoder = LabelBinarizer()
-            return self.encoder.fit_transform(labels)
+            encoder = LabelBinarizer()
+            return encoder.fit_transform(labels)
         else:
             return labels
 
@@ -132,7 +131,7 @@ class Data:
         return self._vectorizer.transform(text)
 
     def _tokenize_text(self, text: list[str], plm_name: str) -> dict:
-        return LMDataOps().lm_tokenize(text, plm_name)
+        return plm_tokenize(text, plm_name)
 
     def _set_vectorizer(self, vectorizer: Type[CountVectorizer]):
         logging.info('Setting custom vectorizer: %s', vectorizer.__name__)
@@ -146,18 +145,16 @@ class Data:
     has_test_data = property(fget=_has_test_data)
     voc = property(fget=_get_vocabulary)
 
+
 class DataLSTM(Data):
-    ''''''
     def _default_vectorizer(self):
         logging.info('Using LSTM Vectorization pipeline')
-        self._text_ds = tf.data.Dataset.from_tensor_slices(self._train_text
-                                                     + self._dev_text)
+        self._text_ds = tf.data.Dataset.from_tensor_slices(
+            self._train_text + self._dev_text)
         self._vocabulary = np.unique(
             self._train_text + self._dev_text + self._test_text)
         self._vectorizer = TextVectorization(
-            standardize=None,
-            output_sequence_length=50
-        )
+            standardize=None, output_sequence_length=50)
         self._vectorizer.adapt(self._text_ds)
         self._vocabulary = self._vectorizer.get_vocabulary()
 
@@ -168,21 +165,3 @@ class DataLSTM(Data):
         return self._vectorizer(np.array([[s] for s in text])).numpy()
 
     voc = property(fget=_get_vocabulary)
-
-class LMDataOps():
-    '''This class holds specific PLM operations'''
-
-    def __init__(self) -> None:
-        pass
-
-    def lm_encoder(self, y_data, encoder):
-        ''''''
-        return encoder.fit_transform(y_data)
-
-    def lm_tokenize(self, x_data, plm_name: str) -> dict:
-        '''Tokenize a given set with current PLM tokenizer'''
-        tokenizer = AutoTokenizer.from_pretrained(plm_name)
-
-        return tokenizer(
-            x_data, padding=True, max_length=100, truncation=True,
-            return_tensors="np").data
