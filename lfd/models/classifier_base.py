@@ -5,7 +5,7 @@ import pickle
 from datetime import datetime
 
 from sklearn.base import BaseEstimator
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV
 from transformers import PreTrainedModel
 from lfd import RUN_ID
@@ -89,11 +89,24 @@ class BaseClassifier(abc.ABC):
 
         predicted = self._evaluation_prediction(x_test)
         report = classification_report(y_test, predicted)
+        conf_matrix = confusion_matrix(y_test, predicted)
 
         file_path = f'{self.results_path}/report.txt'
         logging.info('Writing classification report to %s', file_path)
         with open(file_path, 'a', encoding='utf-8') as file:
             file.writelines(report)
+
+        file_path = f'{self.results_path}/confusion_matrix.json'
+        conf_matrix_list = conf_matrix.tolist()
+        logging.info('Writing confusion matrix to %s', file_path)
+        with open(file_path, 'a', encoding='utf-8') as file:
+            file.writelines('[')
+            for row in conf_matrix_list:
+                if row == conf_matrix_list[-1]:
+                    file.writelines(f'\n  {row}')
+                else:
+                    file.writelines(f'\n  {row},')
+            file.writelines('\n]')
 
     @abc.abstractmethod
     def _evaluation_prediction(self, x_test):
