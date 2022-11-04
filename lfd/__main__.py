@@ -83,10 +83,7 @@ def _main():
                 RandomForestClassifier(), SupportVectorClassifier()
             ]
         else:
-            if args.model == 'lstm':
-                classifier = args_helper.get_classifier(args, data)
-            else:
-                classifier = args_helper.get_classifier(args)
+            classifier = args_helper.get_classifier(args, data)
             if classifier is None:
                 sys.exit(1)
             classifiers = [classifier]
