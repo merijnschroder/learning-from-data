@@ -8,19 +8,13 @@ Python 3.7.x
 ```
 
 It is easiest to set up a virtual environment to run the code. 
-On Windows, run the following:
 ```ps
-> python -m venv .\.venv
-> .\.venv\Scripts\activate
-> python -m pip install --upgrade pip
+> python -m venv .venv
 ```
-
-On Unix-based systems, run the following:
-```bash
-TODO
-```
+Make sure to activate the virtual environment.
 
 To install the dependencies, run
 ```ps
+> python -m pip install --upgrade pip
 > python -m pip install -r requirements.txt
 ```
