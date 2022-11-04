@@ -1,5 +1,3 @@
-from typing import Literal
-
 from sklearn.base import BaseEstimator
 from sklearn.neighbors import KNeighborsClassifier
 from lfd.models.classifier_base import BaseBasicClassifier
@@ -15,9 +13,8 @@ class KNearestNeighboursClassifier(BaseBasicClassifier):
     def __init__(
         self,
         n_neighbours: int = 1,
-        weights: Literal['uniform', 'distance'] = 'uniform',
-        distance_metric: Literal['euclidean', 'manhattan', 'cosine',
-                                 'haversine', 'minkowski'] = 'euclidean'
+        weights: str = 'uniform',
+        distance_metric: str = 'euclidean'
     ):
         self._classifier = KNeighborsClassifier(
             n_neighbors=n_neighbours,

@@ -1,5 +1,3 @@
-from typing import Literal
-
 from sklearn import svm
 from sklearn.base import BaseEstimator
 from lfd import RANDOM_STATE
@@ -16,8 +14,7 @@ class SupportVectorClassifier(BaseBasicClassifier):
     def __init__(
         self,
         C: float = 10,
-        kernel: Literal['linear', 'poly', 'rbf', 'sigmoid',
-                        'precomputed'] = 'rbf'
+        kernel: str = 'rbf'
     ):
         self._classifier = svm.SVC(C=C, kernel=kernel,
                                    random_state=RANDOM_STATE)

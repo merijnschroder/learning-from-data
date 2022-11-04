@@ -3,7 +3,7 @@ import logging
 from lfd.models.classifier_base import BaseClassifier
 from lfd.models.data import Data
 
-from keras.initializers import Constant
+from keras.initializers.initializers_v2 import Constant
 from keras.layers import LSTM, Embedding, Bidirectional
 from keras.layers.core import Dense
 from keras.models import Sequential

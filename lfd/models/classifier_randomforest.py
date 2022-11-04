@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Optional
 
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier as SKClassifier
@@ -16,7 +16,7 @@ class RandomForestClassifier(BaseBasicClassifier):
     def __init__(
         self,
         n_estimators: int = 5,
-        criterion: Literal['gini', 'entropy', 'log_loss'] = 'entropy',
+        criterion: str = 'entropy',
         max_depth: Optional[int] = 100,
         min_samples_leaf: int = 5,
         max_leaf_nodes: Optional[int] = 100

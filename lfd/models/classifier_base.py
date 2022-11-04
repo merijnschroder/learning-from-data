@@ -3,20 +3,23 @@ import logging
 import os
 import pickle
 from datetime import datetime
+from typing import Dict, List, Union
 
 from sklearn.base import BaseEstimator
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.model_selection import GridSearchCV
 from transformers import PreTrainedModel
+
 from lfd import RUN_ID
 from lfd.models.data import Data
+
 
 class BaseClassifier(abc.ABC):
     '''A base class for a classifier'''
 
     classifier_id: str
     _classifier_name: str
-    _classifier: BaseEstimator | PreTrainedModel
+    _classifier: Union[BaseEstimator, PreTrainedModel]
     _is_trained: bool = False
 
     def __init__(self):
@@ -54,7 +57,7 @@ class BaseClassifier(abc.ABC):
     def _train(self, data):
         '''Perform a specialized fit on a model depending on its type'''
 
-    def _grid_search(self, data: Data, param_grid: dict[str, list]):
+    def _grid_search(self, data: Data, param_grid: Dict[str, List]):
         logging.info('Starting grid-search for %s', self.classifier_name)
 
         # Perform the grid-search.

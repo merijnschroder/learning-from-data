@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Type
+from typing import List, Tuple, Type
 
 import numpy as np
 import tensorflow as tf
@@ -11,19 +11,20 @@ from numpy.typing import NDArray
 from scipy.sparse import csr_matrix as sparse_row_matrix
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import LabelBinarizer
+
 from lfd.helpers.data_helper import plm_tokenize, print_label_statistics
 
 
 class Data:
     '''This class holds all data.'''
 
-    _y_train: list[bool]
-    _y_dev: list[bool]
-    _y_test: list[bool] = []
+    _y_train: List[bool]
+    _y_dev: List[bool]
+    _y_test: List[bool] = []
 
-    _train_text: list[str]
-    _dev_text: list[str]
-    _test_text: list[str]
+    _train_text: List[str]
+    _dev_text: List[str]
+    _test_text: List[str]
 
     _vocabulary: NDArray
     _vectorizer: CountVectorizer
@@ -90,11 +91,11 @@ class Data:
         return list(voc.keys())
 
     def _read_data_from_file(
-            self, data_file_path: str) -> tuple[list[str], list[bool]]:
+            self, data_file_path: str) -> Tuple[List[str], List[bool]]:
         '''Read the data from the data file.'''
         logging.info('Loading data from %s', data_file_path)
-        features: list[str] = []
-        labels: list[bool] = []
+        features: List[str] = []
+        labels: List[bool] = []
 
         # Return empty lists if the file does not exist.
         if data_file_path is None or not os.path.exists(data_file_path):
@@ -114,23 +115,23 @@ class Data:
 
         return features, labels
 
-    def _transform_text(self, text: list[str], plm_name: str):
+    def _transform_text(self, text: List[str], plm_name: str):
         if plm_name == '':
             return self._vectorize_text(text)
         else:
             return self._tokenize_text(text, plm_name)
 
-    def _transform_labels(self, labels: list[bool], encoded: bool):
+    def _transform_labels(self, labels: List[bool], encoded: bool):
         if encoded:
             encoder = LabelBinarizer()
             return encoder.fit_transform(labels)
         else:
             return labels
 
-    def _vectorize_text(self, text: list[str]) -> sparse_row_matrix:
+    def _vectorize_text(self, text: List[str]) -> sparse_row_matrix:
         return self._vectorizer.transform(text)
 
-    def _tokenize_text(self, text: list[str], plm_name: str) -> dict:
+    def _tokenize_text(self, text: List[str], plm_name: str) -> dict:
         return plm_tokenize(text, plm_name)
 
     def _set_vectorizer(self, vectorizer: Type[CountVectorizer]):
@@ -161,7 +162,7 @@ class DataLSTM(Data):
     def _get_vocabulary(self):
         return self._vocabulary
 
-    def _transform_text(self, text: list[str], plm_name: str):
+    def _transform_text(self, text: List[str], plm_name: str):
         return self._vectorizer(np.array([[s] for s in text])).numpy()
 
     voc = property(fget=_get_vocabulary)

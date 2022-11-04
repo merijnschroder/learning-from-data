@@ -1,6 +1,7 @@
 '''This module contains helpers for working with command line arguments.'''
 import argparse
 import logging
+from typing import Union
 
 from lfd.models.classifier_base import BaseClassifier
 from lfd.models.classifier_knn import KNearestNeighboursClassifier
@@ -94,7 +95,7 @@ def is_valid(args: argparse.Namespace) -> bool:
 
 
 def get_classifier(args: argparse.Namespace,
-                   data: Data) -> BaseClassifier | None:
+                   data: Data) -> Union[BaseClassifier, None]:
     '''Get the correct classifier based on the command line arguments.'''
     if args.model is None:
         logging.error('Please specify --model')

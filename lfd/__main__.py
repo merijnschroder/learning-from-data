@@ -3,6 +3,7 @@
 import logging
 import os
 import sys
+from typing import List
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -75,7 +76,7 @@ def _main():
             data.vectorizer = TfidfVectorizer
 
     if args.train or args.grid_search:
-        classifiers: list[BaseClassifier]
+        classifiers: List[BaseClassifier]
         if args.all_models:
             logging.info('Running all models')
             classifiers = [
