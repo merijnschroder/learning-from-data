@@ -12,8 +12,8 @@ class KNearestNeighboursClassifier(BaseBasicClassifier):
 
     def __init__(
         self,
-        n_neighbours: int = 1,
-        weights: str = 'uniform',
+        n_neighbours: int = 3,
+        weights: str = 'distance',
         distance_metric: str = 'euclidean'
     ):
         self._classifier = KNeighborsClassifier(
