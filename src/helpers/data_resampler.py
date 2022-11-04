@@ -1,10 +1,9 @@
+import os
+
+import pandas as pd
 from sklearn.utils import resample
 
-import numpy as np
-import os
-import pandas as pd
-
-RANDOM_STATE = 1234
+from lfd import RANDOM_STATE
 
 
 def file_writer(folder_struct, data, data_name, operation_name):
@@ -19,7 +18,7 @@ def file_writer(folder_struct, data, data_name, operation_name):
                 sep='\t', index=False, header=False)
 
 
-def sampling(data, replace=True, sampling: str = 'down'):
+def sampling(data, replace=True, sampling_type: str = 'under'):
     '''
     Executes a resampling based on the given sampling instruction
     and returns a resampled pandas dataframe.
@@ -34,7 +33,7 @@ def sampling(data, replace=True, sampling: str = 'down'):
         majority_class = data_off
         minority_class = data_not
 
-    if sampling == 'down':
+    if sampling_type == 'under':
         changed_label = resample(majority_class,
                                  replace=replace,
                                  n_samples=len(minority_class),
@@ -44,8 +43,8 @@ def sampling(data, replace=True, sampling: str = 'down'):
 
     else:
         if replace is False:
-            print('Setting replace for upsampling does not work: '
-                  'upsampling uses replace=True')
+            print('Setting replace for oversampling does not work: '
+                  'oversampling uses replace=True')
 
         changed_label = resample(minority_class,
                                  replace=True,
@@ -80,11 +79,12 @@ def main():
         if duplicates:
             file_writer(folder_struct, data, name, 'deduplicated')
 
-        data_downsampled = sampling(data, replace=False, sampling='down')
-        file_writer(folder_struct, data_downsampled, name, 'downsampled')
+        data_undersampled = sampling(data, replace=False,
+                                     sampling_type='under')
+        file_writer(folder_struct, data_undersampled, name, 'undersampled')
 
-        data_upsampled = sampling(data, replace=True, sampling='up')
-        file_writer(folder_struct, data_upsampled, name, 'upsampled')
+        data_oversampled = sampling(data, replace=True, sampling_type='over')
+        file_writer(folder_struct, data_oversampled, name, 'oversampled')
 
 
 if __name__ == '__main__':
