@@ -53,6 +53,12 @@ def parse_arguments() -> argparse.Namespace:
         help='Perform a grid-search on the specified model (should be '
              'accompanied by --model or --all-models)'
     )
+    parser.add_argument(
+        '--generate-dataset',
+        action='store_true',
+        help='Adapt the datasets by introducing offensive terms to'
+             'non-offensive tweets (should be accompanied by --model-path)'
+    )
 
     # Options
     parser.add_argument(
@@ -81,16 +87,31 @@ def parse_arguments() -> argparse.Namespace:
         help='The type of vectorizer to use for the models that require one '
              '(default: bag-of-words)'
     )
+    parser.add_argument(
+        '--model-path',
+        type=str,
+        help='The path of the model from which to use the feature importances '
+             'for the dataset generation')
 
     return parser.parse_args()
 
 
 def is_valid(args: argparse.Namespace) -> bool:
     '''Determine whether the command line arguments are valid.'''
-    if not (args.train or args.grid_search or args.print_dataset_statistics):
+    if not (args.train or args.grid_search or args.print_dataset_statistics or
+            args.generate_dataset):
         logging.error('Either run the program with --train, --grid-search, or '
                       '--print-dataset-statistics')
         return False
+
+    if args.generate_dataset and args.model_path is None:
+        logging.error('Specify --model-path when generating a dataset')
+        return False
+
+    if args.generate_dataset and args.test_data is None:
+        logging.error('Specify --test-data when generating a dataset')
+        return False
+
     return True
 
 

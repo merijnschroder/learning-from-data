@@ -7,7 +7,7 @@ from typing import List
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from lfd import RUN_ID
+from lfd import RUN_ID, data_generator
 from lfd.helpers import args_helper
 from lfd.models.classifier_base import BaseClassifier
 from lfd.models.classifier_knn import KNearestNeighboursClassifier
@@ -96,6 +96,8 @@ def _main():
                 classifier.grid_search(data)
     elif args.print_dataset_statistics:
         data.print_statistics()
+    elif args.generate_dataset:
+        data_generator.generate_dataset(args.model_path, data)
 
 
 if __name__ == '__main__':

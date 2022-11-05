@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import List, Tuple, Type
+from typing import List, Tuple, Type, Union
 
 import numpy as np
 import tensorflow as tf
@@ -22,9 +22,9 @@ class Data:
     _y_dev: List[bool]
     _y_test: List[bool] = []
 
-    _train_text: List[str]
-    _dev_text: List[str]
-    _test_text: List[str]
+    train_text: List[str]
+    dev_text: List[str]
+    test_text: List[str]
 
     _vocabulary: NDArray
     _vectorizer: CountVectorizer
@@ -32,11 +32,11 @@ class Data:
     def __init__(self, train_file: str, dev_file: str, test_file: str):
         # Load the data from the data files.
         logging.info('Start loading data')
-        self._train_text, self._y_train = self._read_data_from_file(train_file)
-        self._dev_text, self._y_dev = self._read_data_from_file(dev_file)
-        self._test_text = []
+        self.train_text, self._y_train = self._read_data_from_file(train_file)
+        self.dev_text, self._y_dev = self._read_data_from_file(dev_file)
+        self.test_text = []
         if test_file is not None:
-            self._test_text, self._y_test = self._read_data_from_file(
+            self.test_text, self._y_test = self._read_data_from_file(
                 test_file)
         self._default_vectorizer()
 
@@ -44,7 +44,7 @@ class Data:
         '''Set the default vectorizer.'''
         logging.info('Using the default Vectorization pipeline')
         self._vocabulary = np.unique(
-            self._train_text + self._dev_text + self._test_text)
+            self.train_text + self.dev_text + self.test_text)
         self._vectorizer = CountVectorizer()
         self._vectorizer.fit(self._vocabulary)
 
@@ -69,13 +69,13 @@ class Data:
         print_label_statistics(self._y_test)
 
     def get_x_train(self, plm_name: str = ''):
-        return self._transform_text(self._train_text, plm_name)
+        return self._transform_text(self.train_text, plm_name)
 
     def get_x_dev(self, plm_name: str = ''):
-        return self._transform_text(self._dev_text, plm_name)
+        return self._transform_text(self.dev_text, plm_name)
 
     def get_x_test(self, plm_name: str = ''):
-        return self._transform_text(self._test_text, plm_name)
+        return self._transform_text(self.test_text, plm_name)
 
     def get_y_train(self, encoded: bool = False):
         return self._transform_labels(self._y_train, encoded)
@@ -121,7 +121,8 @@ class Data:
         else:
             return self._tokenize_text(text, plm_name)
 
-    def _transform_labels(self, labels: List[bool], encoded: bool):
+    def _transform_labels(self, labels: List[bool], encoded: bool
+                          ) -> Union[sparse_row_matrix, NDArray, List[bool]]:
         if encoded:
             encoder = LabelBinarizer()
             return encoder.fit_transform(labels)
@@ -134,6 +135,9 @@ class Data:
     def _tokenize_text(self, text: List[str], plm_name: str) -> dict:
         return plm_tokenize(text, plm_name)
 
+    def _get_vectorizer(self) -> CountVectorizer:
+        return self._vectorizer
+
     def _set_vectorizer(self, vectorizer: Type[CountVectorizer]):
         logging.info('Setting custom vectorizer: %s', vectorizer.__name__)
         self._vectorizer = vectorizer()
@@ -142,7 +146,7 @@ class Data:
     def _has_test_data(self) -> bool:
         return len(self._y_test) > 0
 
-    vectorizer = property(fset=_set_vectorizer)
+    vectorizer = property(fget=_get_vectorizer, fset=_set_vectorizer)
     has_test_data = property(fget=_has_test_data)
     voc = property(fget=_get_vocabulary)
 
@@ -151,9 +155,9 @@ class DataLSTM(Data):
     def _default_vectorizer(self):
         logging.info('Using LSTM Vectorization pipeline')
         self._text_ds = tf.data.Dataset.from_tensor_slices(
-            self._train_text + self._dev_text)
+            self.train_text + self.dev_text)
         self._vocabulary = np.unique(
-            self._train_text + self._dev_text + self._test_text)
+            self.train_text + self.dev_text + self.test_text)
         self._vectorizer = TextVectorization(
             standardize=None, output_sequence_length=50)
         self._vectorizer.adapt(self._text_ds)
