@@ -117,7 +117,7 @@ def is_valid(args: argparse.Namespace) -> bool:
         logging.error('Specify --test-data when generating a dataset')
         return False
 
-    if args.model == 'lstm' or args.model == 'plm' and args.grid_search:
+    if (args.model == 'lstm' or args.model == 'plm') and (args.grid_search):
         logging.error('Grid search is not implemented for LSTMs or PLMs')
         return False
 
