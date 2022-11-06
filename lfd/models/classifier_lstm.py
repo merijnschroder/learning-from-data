@@ -9,6 +9,7 @@ from keras.layers.core import Dense
 from keras.models import Sequential
 from keras.optimizers import SGD, Adagrad, Adam, Adamax
 import tensorflow as tf
+from typing_extensions import override
 import numpy as np
 import json
 
@@ -208,8 +209,16 @@ class LSTMClassifier(BaseClassifier):
         )
         self.encoder = data._encoder
 
+    @override
     def _evaluation_prediction(self, x_test):
         logging.info('Start evaluating %s on %d data points',
                      self.classifier_name, x_test.shape[0])
-        # return self._classifier.predict(x_test)  # type: ignore
         return self.encoder.inverse_transform(self._classifier.predict(x_test))  # type: ignore
+
+    @override
+    def grid_search(self, data: Data):
+        pass
+
+    @override
+    def _grid_search_fitting(self, grid_search, data):
+        pass

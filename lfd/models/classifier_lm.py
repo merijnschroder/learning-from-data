@@ -79,3 +79,11 @@ class LanguageModelClassifier(BaseClassifier):
                      self.classifier_name)
         output = self._classifier.predict(x_test)["logits"]
         return tf.round(tf.nn.sigmoid(output))
+
+    @override
+    def grid_search(self, data: Data):
+        pass
+
+    @override
+    def _grid_search_fitting(self, grid_search, data):
+        pass
