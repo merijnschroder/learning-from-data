@@ -51,7 +51,9 @@ def parse_arguments() -> argparse.Namespace:
         '--grid-search',
         action='store_true',
         help='Perform a grid-search on the specified model (should be '
-             'accompanied by --model or --all-models)'
+             'accompanied by --model or --all-models) '
+             'Note: This does not work with the lstm or PLMs and will '
+             'raise an error'
     )
     parser.add_argument(
         '--generate-dataset',
@@ -75,7 +77,7 @@ def parse_arguments() -> argparse.Namespace:
                  'bert-base-uncased',
                  'microsoft/deberta-v3-base'],
         default='bert-base-uncased',
-        help='The name of the Pre-trained Language Model (required when when '
+        help='The name of the Pre-trained Language Model (required when '
              'model is set to \'plm\', default: bert-base-uncased)'
     )
     parser.add_argument('--all-models', action='store_true',
@@ -113,6 +115,10 @@ def is_valid(args: argparse.Namespace) -> bool:
 
     if args.generate_dataset and args.test_data is None:
         logging.error('Specify --test-data when generating a dataset')
+        return False
+
+    if args.model == 'lstm' or args.model == 'plm' and args.grid_search:
+        logging.error('Grid search is not implemented for LSTMs or PLMs')
         return False
 
     return True

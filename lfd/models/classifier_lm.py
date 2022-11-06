@@ -60,14 +60,6 @@ class LanguageModelClassifier(BaseClassifier):
         self._evaluate(
             data.get_x_test(self._model_name), data.get_y_test(True))
 
-    def grid_search(self, data: Data):
-        param_grid = {
-            'learning_rate': [0.00005, 0.00000005, 0.0000000001],
-            'epochs': [1, 3, 5],
-            'batch_size': [0.005, 0.05, 0.5],
-        }
-        self._grid_search(data, param_grid)
-
     @override
     def _train(self, data: Data):
         validation_data = (
@@ -87,8 +79,3 @@ class LanguageModelClassifier(BaseClassifier):
                      self.classifier_name)
         output = self._classifier.predict(x_test)["logits"]
         return tf.round(tf.nn.sigmoid(output))
-
-    @override
-    def _grid_search_fitting(self, grid_search, data):
-        grid_search.fit(
-            data.get_x_train(self._model_name), data.get_y_train(True))

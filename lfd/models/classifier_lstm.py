@@ -60,17 +60,6 @@ class LSTMClassifier(BaseClassifier):
         )
         super().__init__()
 
-    def grid_search(self, data: Data):
-        param_grid = {
-            'optimizer': ['SGD', 'Adam', 'Adagrad', 'Adamax'],
-            'learning_rate': [0.5, 0.05, 0.00005],
-            'non_pretrained_embeddings': [False, True],
-            'trainable_embeddings': [True, False],
-            'architecture': '3',
-            'bidirectional': [False, True]
-        }
-        self._grid_search(data, param_grid)
-
     def create_model(self,
         data,
         optimizer,
@@ -224,7 +213,3 @@ class LSTMClassifier(BaseClassifier):
                      self.classifier_name, x_test.shape[0])
         # return self._classifier.predict(x_test)  # type: ignore
         return self.encoder.inverse_transform(self._classifier.predict(x_test))  # type: ignore
-
-    def _grid_search_fitting(self, grid_search, data):
-        # grid_search.fit(data.get_x_train().toarray(), data.get_y_train(encoded=True))
-        grid_search.fit(data.get_x_train(), data.get_y_train(encoded=True))
