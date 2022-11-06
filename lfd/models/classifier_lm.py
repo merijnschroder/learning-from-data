@@ -23,7 +23,9 @@ class LanguageModelClassifier(BaseClassifier):
         model_name: str,
         model_verbosity: int = 0,
         training_verbosity: int = 1,
-        learning_rate=0.00005
+        learning_rate=1e-5,
+        batch_size=8,
+        epochs=1
     ) -> None:
         self._model_name = model_name
         self._classifier_name = f'PLM_{model_name}'
@@ -31,6 +33,11 @@ class LanguageModelClassifier(BaseClassifier):
         self._training_verbosity = training_verbosity
         self._classifier = \
             self.create_classifier(num_labels=1, learning_rate=learning_rate)
+        self._batch_size = batch_size
+        self._epochs = epochs
+        bert_tuple = ('bert-base-uncased', 'bert-base-cased')
+        if model_name in bert_tuple:
+            self._epochs = 3
         super().__init__()
 
     def create_classifier(self, num_labels: int,
@@ -69,8 +76,8 @@ class LanguageModelClassifier(BaseClassifier):
             data.get_x_train(self._model_name),
             data.get_y_train(True),
             verbose=self._training_verbosity,
-            epochs=1,
-            batch_size=16,
+            epochs=self._epochs,
+            batch_size=self._batch_size,
             validation_data=validation_data
         )
 
