@@ -31,6 +31,12 @@ class LanguageModelClassifier(BaseClassifier):
         self._classifier_name = f'PLM_{model_name}'
         self._model_verbosity = model_verbosity
         self._training_verbosity = training_verbosity
+
+        if model_name == 'GroNLP/hateBERT':
+            self.gro_pt = True
+        else:
+            self.gro_pt = False
+
         self._classifier = \
             self.create_classifier(num_labels=1, learning_rate=learning_rate)
         self._batch_size = batch_size
@@ -45,7 +51,7 @@ class LanguageModelClassifier(BaseClassifier):
         '''Create the PLM model and set learning rate'''
         model: PreTrainedModel = \
             TFAutoModelForSequenceClassification.from_pretrained(
-                self._model_name, num_labels=num_labels)
+                self._model_name, num_labels=num_labels, from_pt=self.gro_pt)
         loss_function = tf.keras.losses.BinaryCrossentropy(from_logits=True)
         optim = tf.keras.optimizers.Adam(learning_rate=learning_rate)
         model.compile(
