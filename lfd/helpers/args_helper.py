@@ -70,7 +70,10 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--language-model',
         type=str,
-        choices=['bert-base-uncased'],
+        choices=['GroNLP/hateBERT',
+                 'bert-base-cased',
+                 'bert-base-uncased',
+                 'microsoft/deberta-v3-base'],
         default='bert-base-uncased',
         help='The name of the Pre-trained Language Model (required when when '
              'model is set to \'plm\', default: bert-base-uncased)'
