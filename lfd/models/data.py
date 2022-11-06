@@ -38,6 +38,7 @@ class Data:
         if test_file is not None:
             self.test_text, self._y_test = self._read_data_from_file(
                 test_file)
+        self._encoder = LabelBinarizer()
         self._default_vectorizer()
 
     def _default_vectorizer(self):
@@ -124,8 +125,7 @@ class Data:
     def _transform_labels(self, labels: List[bool], encoded: bool
                           ) -> Union[sparse_row_matrix, NDArray, List[bool]]:
         if encoded:
-            encoder = LabelBinarizer()
-            return encoder.fit_transform(labels)
+            return self._encoder.fit_transform(labels)
         else:
             return labels
 

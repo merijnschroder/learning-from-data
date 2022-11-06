@@ -24,14 +24,14 @@ class LSTMClassifier(BaseClassifier):
     def __init__(
         self,
         data: Data,
-        optimizer='Adam',
-        learning_rate=1e-05,
+        optimizer='SGD',
+        learning_rate=5e-2,
         non_pretrained_embeddings=False,
         trainable_embeddings=True,
-        architecture='300.3r',
+        architecture='300.3',
         bidirectional=True,
-        epochs=50,
-        batch_size=16
+        epochs=15,
+        batch_size=8
     ) -> None:
         self.epochs = epochs
         self.batch_size = batch_size
@@ -217,7 +217,7 @@ class LSTMClassifier(BaseClassifier):
             batch_size=self.batch_size,
             validation_data=(data.get_x_dev(), data.get_y_dev(encoded=True)),
         )
-        self.encoder = data.encoder
+        self.encoder = data._encoder
 
     def _evaluation_prediction(self, x_test):
         logging.info('Start evaluating %s on %d data points',
