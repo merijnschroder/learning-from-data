@@ -21,10 +21,25 @@ To install the dependencies, run
 
 ## Running the Program
 This program can be ran in four different 'modes'.
+For each mode, the `--train-data`, `--dev-data`, and `--test-data` arguments are relevant, which must contain the paths to the corresponding data files.
+The first two have a default value set up.
+The last argument is optional, and will be ignored in all modes when not specified.
+
+Also the `--verbose` flag is universal: add this flag for detailed logs.
 
 ### Train and Evaluate
+To train a model and evaluate it, the program must be ran with the `--train` flag.
+When this flag is provided, a model is trained on the data specified by `--train-data`, evaluated on the data specified by `--dev-data` and, if provided, also evaluated on `--test-data`.
+The results will be written to the `experiments` folder.
+
+When the `--train` flag is added, also `--model` or `--all-models` needs to be specified, which will tell the program which model to train and evaluate.
+The `--all-models` option trains all classic models: K-Nearest Neighbours, Naive Bayes, Random Forest, and Support Vector Classifier.
+When choosing for the PLM model, you also need to specify which language model you would want to train, using `--language-model`.
+Finally, when a classic model or `--all-models` is specified, `--vectorizer` can be used to set the vectorizer used by the model.
 
 ### Grid-Search
+To perform a grid-search, the program can be ran with the `--grid-search` flag.
+This mode requires the same additional arguments as the `--train` flag: the data file paths, and `--model` or `--all-models`, optionally accompanied by `--language-model`.
 
 ### Generate Dataset
 When running in this mode, the program
@@ -42,4 +57,6 @@ Also the path of the testing dataset that will be adapted should be specified wi
 `--train-data` and `--dev-data` have default values, but if you want to change those, you also need to specify them.
 
 ### Print Dataset Statistics
-
+The final, and most straightforward mode, is printing some statistics of the dataset.
+This can be done by running the program with the `--print-dataset-statistics` flag.
+Make sure the `--train-data`, `--dev-data`, and `--test-data` arguments contain the paths to the data files the statistics should be printed of.
