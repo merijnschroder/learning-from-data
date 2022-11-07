@@ -3,8 +3,12 @@ import logging
 import tensorflow as tf
 from lfd.models.classifier_base import BaseClassifier
 from lfd.models.data import Data
-from transformers import PreTrainedModel, TFAutoModelForSequenceClassification
+import transformers
+from transformers import PreTrainedModel
 from typing_extensions import override
+from lfd import RANDOM_STATE
+
+transformers.set_seed(RANDOM_STATE)
 
 
 class LanguageModelClassifier(BaseClassifier):
@@ -49,8 +53,8 @@ class LanguageModelClassifier(BaseClassifier):
     def create_classifier(self, num_labels: int,
                           learning_rate: float) -> PreTrainedModel:
         '''Create the PLM model and set learning rate'''
-        model: PreTrainedModel = \
-            TFAutoModelForSequenceClassification.from_pretrained(
+        model: transformers.PreTrainedModel = \
+            transformers.TFAutoModelForSequenceClassification.from_pretrained(
                 self._model_name, num_labels=num_labels, from_pt=self.gro_pt)
         loss_function = tf.keras.losses.BinaryCrossentropy(from_logits=True)
         optim = tf.keras.optimizers.Adam(learning_rate=learning_rate)

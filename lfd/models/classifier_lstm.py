@@ -2,6 +2,7 @@ import logging
 
 from lfd.models.classifier_base import BaseClassifier
 from lfd.models.data import Data
+from lfd import RANDOM_STATE
 
 from keras.initializers.initializers_v2 import Constant
 from keras.layers import LSTM, Embedding, Bidirectional
@@ -12,6 +13,8 @@ import tensorflow as tf
 from typing_extensions import override
 import numpy as np
 import json
+
+tf.keras.utils.set_random_seed(RANDOM_STATE)
 
 
 class LSTMClassifier(BaseClassifier):
