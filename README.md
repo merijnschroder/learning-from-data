@@ -1,6 +1,9 @@
+# Detecting Offensive Tweets
+In this project we experiment with different NLP techniques to find the best method for identifying offensive tweets.
+
 ## Setting Up the Environment
 Make sure to have Python 3.7 installed on your machine.
-You can check this by running
+You can check this by running the following command.
 
 ```ps
 > python -V
