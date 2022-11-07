@@ -47,7 +47,7 @@ This mode requires the same additional arguments as the `--train` flag: the data
 ### Generate Dataset
 When running in this mode, the program
 1. extracts the most important predictor words for offensive tweets from the model specified in the `--model-path`,
-2. loads the training, development, and testing datasets specified by the arguments and randomly adds one of these words to all non-offensive tweets, and
+2. loads the training, development, and testing datasets specified by the arguments and randomly adds one of these words to all inoffensive tweets, and
 3. writes the adapted data to `data/generated`.
 
 Note that this only needs to happen once, and not every time you want to run a model on generated data.
