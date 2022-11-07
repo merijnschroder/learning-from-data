@@ -60,6 +60,10 @@ def parse_arguments():
 
 
 def hashtag(text):
+    '''
+    Processes hashtags conform GloVe Twitter and 
+    returns the results
+    '''
     text = text.group()
     hashtag_body = text[1:]
     if hashtag_body.isupper():
@@ -70,6 +74,10 @@ def hashtag(text):
 
 
 def tweet_processor(text):
+    '''
+    Processes a given text and returns a text with tokens that 
+    can be found in the GloVe Twitter embeddings
+    '''
     # Different regex parts for smiley faces
     eyes = r"[8:=;]"
     nose = r"['`\-]?"
@@ -107,6 +115,7 @@ def tweet_processor(text):
 
 
 def testing():
+    '''Prints example conversions to show what the program is capable off'''
     text = "I TEST alllll kinds of #hashtags and #HASHTAGS, @mentions and 3000 (http://t.co/dkfjkdf). w/ <3 :) haha!!!!!"
     text2 = "TEStiNg some *tough* #CASES" # couple extra tests
     text_trainset = "@USER She should ask a few native Americans what their take on this is."
@@ -119,8 +128,10 @@ def testing():
 
 
 def importer(args, tsv):
-    folder = args.input
-
+    '''
+    Imports a file from the given folder argument and returns it
+    as a dictionary
+    '''
     with open(f'{folder}/{tsv}', 'r', encoding='utf-8') as f:
         data = f.readlines()
 
@@ -128,6 +139,10 @@ def importer(args, tsv):
 
 
 def exporter(args, tsv, tweets_dict):
+    '''
+    Checks whether the new folder exists, and exports a file
+    to said folder
+    '''
     folder = args.output
 
     if not os.path.exists(folder):
@@ -139,7 +154,10 @@ def exporter(args, tsv, tweets_dict):
 
 
 def processing(args):
-    ''''''
+    '''
+    Takes an argument containing the folder for conversion and 
+    Pre-processes the train, dev, and test sets for GloVe Twitter
+    '''
     tsvs = ('train.tsv', 'dev.tsv', 'test.tsv')
 
     for tsv in tsvs:
