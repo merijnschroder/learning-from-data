@@ -19,14 +19,15 @@ def print_class_distribution(labels: list) -> None:
         print(f'{label}: {label_cnt} ({np.round(label_cnt / total_cnt, 3)})')
 
 
-def lm_encoder(y_data, encoder):
-    return encoder.fit_transform(y_data)
+def lm_encoder(labels, encoder):
+    '''Encode labels.'''
+    return encoder.fit_transform(labels)
 
 
-def plm_tokenize(x_data, plm_name: str) -> dict:
-    '''Tokenize a given set with current PLM tokenizer'''
+def plm_tokenize(text, plm_name: str) -> dict:
+    '''Tokenize the text with the current PLM tokenizer'''
     tokenizer = AutoTokenizer.from_pretrained(plm_name)
 
     return tokenizer(
-        x_data, padding=True, max_length=100, truncation=True,
+        text, padding=True, max_length=100, truncation=True,
         return_tensors="np").data

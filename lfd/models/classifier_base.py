@@ -1,3 +1,8 @@
+'''
+This module contains classes which mostly contain abstract methods. They
+represent different types of classifiers.
+'''
+
 import abc
 import logging
 import os
@@ -31,6 +36,7 @@ class BaseClassifier(abc.ABC):
         if not hasattr(self._classifier, 'fit'):
             raise TypeError('Invalid classifier: not implementing \'fit\'')
 
+        # Train the classifier.
         logging.info('Start training classifier: %s', self.classifier_name)
         self._train(data)
         self._is_trained = True
@@ -58,6 +64,7 @@ class BaseClassifier(abc.ABC):
         '''Perform a specialized fit on a model depending on its type'''
 
     def _grid_search(self, data: Data, param_grid: Dict[str, List]):
+        '''Perform a grid-search.'''
         logging.info('Starting grid-search for %s', self.classifier_name)
 
         # Perform the grid-search.
@@ -79,7 +86,7 @@ class BaseClassifier(abc.ABC):
 
     @abc.abstractmethod
     def _grid_search_fitting(self, grid_search, data):
-        '''Grid-search for the data for a specific model type'''
+        '''Perform a grid-search for the data for a specific model type.'''
 
     def _evaluate(self, x_test, y_test):
         '''Evaluate the classifier with the testing data.'''
@@ -90,10 +97,12 @@ class BaseClassifier(abc.ABC):
         if not hasattr(self._classifier, 'fit'):
             raise TypeError('Invalid classifier: not implementing \'predict\'')
 
+        # Get the report and confusion matrix.
         predicted = self._evaluation_prediction(x_test)
         report = classification_report(y_test, predicted)
         conf_matrix = confusion_matrix(y_test, predicted)
 
+        # Write the results to files.
         file_path = f'{self.results_path}/report.txt'
         logging.info('Writing classification report to %s', file_path)
         with open(file_path, 'a', encoding='utf-8') as file:
@@ -121,6 +130,7 @@ class BaseClassifier(abc.ABC):
         return self._classifier_name
 
     def _get_results_path(self) -> str:
+        '''Get the directory path to which to write the results.'''
         path = f'experiments/{RUN_ID}/classifiers/{self._classifier_name}'
         os.makedirs(path, exist_ok=True)
         return path

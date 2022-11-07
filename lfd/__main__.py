@@ -51,6 +51,7 @@ def _set_up_logger(verbose: bool) -> None:
 
 
 def _train_classifier(classifier: BaseClassifier, data: Data) -> None:
+    '''Train and evaluate a single classifier.'''
     logging.info('Running %s', classifier.classifier_name)
     classifier.train(data)
     classifier.evaluate_dev(data)
@@ -59,6 +60,7 @@ def _train_classifier(classifier: BaseClassifier, data: Data) -> None:
 
 
 def _main():
+    # Get the command line argment values.
     args = args_helper.parse_arguments()
     _set_up_logger(args.verbose)
     logging.info('Starting program (id: %s)', RUN_ID)
@@ -76,6 +78,7 @@ def _main():
             data.vectorizer = TfidfVectorizer
 
     if args.train or args.grid_search:
+        # Get a list of classifiers to train or perform grid-search on.
         classifiers: List[BaseClassifier]
         if args.all_models:
             logging.info('Running all models')
@@ -89,6 +92,7 @@ def _main():
                 sys.exit(1)
             classifiers = [classifier]
 
+        # For each classifier in the list, perform the training or grid-search.
         for classifier in classifiers:
             if args.train:
                 _train_classifier(classifier, data)

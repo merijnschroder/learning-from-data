@@ -3,6 +3,7 @@
 import logging
 import os
 from typing import List, Tuple, Type, Union
+from typing_extensions import override
 
 import numpy as np
 import tensorflow as tf
@@ -38,6 +39,8 @@ class Data:
         if test_file is not None:
             self.test_text, self._y_test = self._read_data_from_file(
                 test_file)
+
+        # set the default encoder and vectorizer.
         self._encoder = LabelBinarizer()
         self._default_vectorizer()
 
@@ -70,24 +73,31 @@ class Data:
         print_label_statistics(self._y_test)
 
     def get_x_train(self, plm_name: str = ''):
+        '''Get the features from the training dataset.'''
         return self._transform_text(self.train_text, plm_name)
 
     def get_x_dev(self, plm_name: str = ''):
+        '''Get the features from the development dataset.'''
         return self._transform_text(self.dev_text, plm_name)
 
     def get_x_test(self, plm_name: str = ''):
+        '''Get the features from the testing dataset.'''
         return self._transform_text(self.test_text, plm_name)
 
     def get_y_train(self, encoded: bool = False):
+        '''Get the labels from the training dataset.'''
         return self._transform_labels(self._y_train, encoded)
 
     def get_y_dev(self, encoded: bool = False):
+        '''Get the labels from the development dataset.'''
         return self._transform_labels(self._y_dev, encoded)
 
     def get_y_test(self, encoded: bool = False):
+        '''Get the labels from the testing dataset.'''
         return self._transform_labels(self._y_test, encoded)
 
     def _get_vocabulary(self):
+        '''Get de vocabulary from the vectorizer.'''
         voc = self._vectorizer.vocabulary_
         return list(voc.keys())
 
@@ -117,6 +127,7 @@ class Data:
         return features, labels
 
     def _transform_text(self, text: List[str], plm_name: str):
+        '''Either vectorize or tokenize the text.'''
         if plm_name == '':
             return self._vectorize_text(text)
         else:
@@ -124,15 +135,21 @@ class Data:
 
     def _transform_labels(self, labels: List[bool], encoded: bool
                           ) -> Union[sparse_row_matrix, NDArray, List[bool]]:
+        '''
+        Return the labels if encoded is False, otherwise return the encoded
+        labels.
+        '''
         if encoded:
             return self._encoder.fit_transform(labels)
         else:
             return labels
 
     def _vectorize_text(self, text: List[str]) -> sparse_row_matrix:
+        '''Vectorize the text using the set vectorizer.'''
         return self._vectorizer.transform(text)
 
     def _tokenize_text(self, text: List[str], plm_name: str) -> dict:
+        '''Tokenize the text.'''
         return plm_tokenize(text, plm_name)
 
     def _get_vectorizer(self) -> CountVectorizer:
@@ -144,6 +161,7 @@ class Data:
         self._vectorizer.fit(self._vocabulary)
 
     def _has_test_data(self) -> bool:
+        '''Returns whether test data was loaded.'''
         return len(self._y_test) > 0
 
     vectorizer = property(fget=_get_vectorizer, fset=_set_vectorizer)
@@ -152,6 +170,7 @@ class Data:
 
 
 class DataLSTM(Data):
+    @override
     def _default_vectorizer(self):
         logging.info('Using LSTM Vectorization pipeline')
         self._text_ds = tf.data.Dataset.from_tensor_slices(
@@ -163,9 +182,11 @@ class DataLSTM(Data):
         self._vectorizer.adapt(self._text_ds)
         self._vocabulary = self._vectorizer.get_vocabulary()
 
+    @override
     def _get_vocabulary(self):
         return self._vocabulary
 
+    @override
     def _transform_text(self, text: List[str], plm_name: str):
         return self._vectorizer(np.array([[s] for s in text])).numpy()
 
